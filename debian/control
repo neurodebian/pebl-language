@@ -1,0 +1,36 @@
+Source: pebl-language
+Section: science
+Priority: optional
+Maintainer: NeuroDebian Team <team@neuro.debian.net>
+Uploaders: Michael Hanke <mih@debian.org>
+Build-Depends: debhelper (>= 9),
+  libsdl1.2-dev,
+  libsdl-net1.2-dev,
+  libpng12-dev | libpng-dev,
+  dos2unix
+Standards-Version: 3.9.5
+Homepage: http://pebl.sourceforge.net
+#Vcs-Git: git://anonscm.debian.org/collab-maint/pebl-language.git
+#Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/pebl-language.git;a=summary
+
+Package: pebl-language
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+  pebl-language-data (= ${source:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: pebl-language-data
+Architecture: all
+Depends: ${misc:Depends},
+  ttf-georgewilliams,
+  ttf-dejavu-core,
+  fonts-freefont-ttf,
+  fonts-sil-charis,
+  fonts-sil-doulos,
+  fonts-sil-gentium,
+  fonts-unfonts-core,
+  ttf-bitstream-vera,
+  fonts-wqy-zenhei
+Description: documentation, fonts, and media files for PEBL
+ <insert long description, indented with spaces>

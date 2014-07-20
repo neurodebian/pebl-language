@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+# use standard build flags
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/default.mk
+
+# enable hardening
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@ 
+
+override_dh_auto_build:
+	dh_auto_build
+	$(MAKE) -B doc
+
+override_dh_auto_install:
+	dh_auto_install
+	find debian/tmp -type f -name '*.txt' -exec chmod -x {} \;
+	find debian/tmp -type f -name LICENSE -delete
+
+override_dh_compress:
+	dh_compress -X.pdf
+
+override_dh_clean:
+	dh_clean
+	rm -f bin/pebl
+	rm -rf obj/
+	rm -f doc/pman/*.pdf doc/pman/*.aux doc/pman/*.toc doc/pman/*.out doc/pman/*.log
+	:	rm -rf debian/tmp/

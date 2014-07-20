@@ -1,0 +1,5 @@
+pebl-language (0.14~dfsg.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Michael Hanke <mih@debian.org>  Sat, 19 Jul 2014 08:17:06 +0200
