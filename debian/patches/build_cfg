@@ -1,0 +1,67 @@
+--- a/Makefile
++++ b/Makefile
+@@ -28,11 +28,11 @@
+ 
+ #This only affects install location.  The binary should be 
+ #locatable anywhere
+-PREFIX = /usr/local/
++PREFIX = $(DESTDIR)/usr/
+ 
+ PEBL_VERSION =0.14
+-USE_WAAVE=1       ##Optional; comment out to turn off waave multimedia library
+-USE_AUDIOIN=1     ##Optional; comment out to turn off  sdl_audioin library
++#USE_WAAVE=1       ##Optional; comment out to turn off waave multimedia library
++#USE_AUDIOIN=1     ##Optional; comment out to turn off  sdl_audioin library
+ USE_NETWORK=1     ##Optional; comment out to turn off sdl_net library.
+ USE_PORTS=1 
+ USE_HTTP=1      ##Optional; turn on/off for http get/set
+@@ -51,9 +51,9 @@
+ else
+ DEBUGFLAGS = 
+ endif
+-CFLAGS =   -O3 -std=c99 -DPREFIX=$(PREFIX) -g 
++CFLAGS :=   -O3 -std=c99 -DPREFIX=$(PREFIX) -g $(CFLAGS)
+ 
+-CXXFLAGS0 =  -g -O3  -DPEBL_UNIX  -DPEBL_LINUX -DENABLE_BINRELOC -DPREFIX=$(PREFIX) 
++CXXFLAGS0 =  -g -O3  -DPEBL_UNIX  -DPEBL_LINUX -DENABLE_BINRELOC -DPREFIX=$(PREFIX)
+ 
+ 
+ ifdef USE_WAAVE
+@@ -87,8 +87,8 @@
+ 
+ 
+ 
+-CXXFLAGS = $(CXXFLAGS0) $(CXXFLAGS1) $(CXXFLAGS2) $(CXXFLAGS3) $(CXXFLAGS4) $(CXXFLAGS5)
+-LINKOPTS = $(LINKOPTS1) $(LINKOPTS2) $(LINKOPTS3)
++CXXFLAGS := $(CXXFLAGS0) $(CXXFLAGS1) $(CXXFLAGS2) $(CXXFLAGS3) $(CXXFLAGS4) $(CXXFLAGS5) $(CXXFLAGS)
++LINKOPTS = $(LINKOPTS1) $(LINKOPTS2) $(LINKOPTS3) $(LDFLAGS)
+ 
+ SDL_CONFIG = /usr/bin/sdl-config
+ 
+@@ -315,7 +315,7 @@
+ 
+ 
+ main:  $(DIRS) $(PEBLMAIN_OBJ) $(PEBLMAIN_INC)
+-	$(CXX) $(CXXFLAGS) -Wall -Wl,-rpath -Wl,LIBDIR $(DEBUGFLAGS) \
++	$(CXX) $(CXXFLAGS) -Wall $(DEBUGFLAGS) \
+ 	$(SDL_FLAGS) -g	\
+ 	-o $(BIN_DIR)/pebl \
+ 	$(OSX_FLAGS) $(BASE_DIR)/$(PEBLBASE_SRC) \
+@@ -332,7 +332,7 @@
+ 
+ 
+ doc: $(PEBL_DOCSRC)
+-	cd doc/pman; pdflatex main.tex
++	cd doc/pman; pdflatex --interaction=nonstopmode main.tex || true
+ 	cp doc/pman/main.pdf doc/pman/PEBLManual$(PEBL_VERSION).pdf
+ 
+ deb:    main doc
+@@ -407,7 +407,7 @@
+ 	cp battery/\.\.png $(PREFIX)share/pebl/battery
+ 	cp battery/\.\.about.txt $(PREFIX)share/pebl/battery
+ 	rm -rf `find $(PREFIX)share/pebl/battery -type d -name .svn`
+-	rm `find $(PREFIX)share/pebl/battery | grep \~`
++	#rm `find $(PREFIX)share/pebl/battery | grep \~`
+ 	rm -Rf `find $(PREFIX)share/pebl/battery | grep 'data'`
+ 	rm -f $(PREFIX)share/pebl/battery/launch.bat
+ 	rm -f $(PREFIX)share/pebl/battery/PEBLLaunch-log.txt
