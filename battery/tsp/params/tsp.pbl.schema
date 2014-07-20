@@ -1,0 +1,11 @@
+targsize|25|Target radius in pixels
+dointro|1|Do intro/practice tests
+xoffset|70|Field area upper left X
+yoffset|70|Field area upper left y
+width|500|Width of field (plus gutter)
+height|500|Height of field (plus gutter)
+trialspersize|5|Select number of trials per length. Choose up to 15
+chooserandomtrials|0|Whether to choose random trials or the first N
+inputlabel|click|i.e., click or touch
+doflash|0|should the circle flash when you click it?  Good for touchscreen, where fingure covers the circle and you still want feedback.
+dobeep|1|Should a click play when clicks made?

@@ -1,0 +1,16 @@
+In diesem Experiment geht es um ein Gluecksspiel, in dem Sie um Spielgeld spielen koennen.Ihr Startkapital betraegt 2000 Euro. Bei jedem Versuch, koennen Sie eine Karte von einem von vier Stapeln nehmen. Wenn Sie eine Karte ausgewaehlt haben bekommen Sie dafuer entweder eine Belohnung oder muessen eine Geldstrafe zahlen. Ihr Ziel ist es so viel Geld  wie moeglich dazu zu bekommen. Dafuer duerfen Sie jederzeit von jedem Stapel eine Karte ziehen. Klicken Sie um fortzufahren.
+Fuer jede Karte, die Sie ziehen, bekommen Sie eine Belohnung. Die Hoehe dieser Belohnung haengt davon ab, welchen Stapel sie waehlen, jeder Stapel hat eine fixe Belohnungshoehe.Sie werden aber auch Geldstrafen zahlen muessen. Diese Strafen sind einigermassen zufaellig, die Strafe, die Sie bekommen ist bei den verschiedenen Karten auf einem bestimmten Stapel unterschiedlich. Manchmal ist die Strafe null und manchmal ist Sie etwas groesser, manchmal sogar groesser als die Belohnung, die Sie fuer die Wahl eines bestimmten Stapels bekommen.Sie sollen versuchen am Ende des Spiels so viel Geld wie moeglich zu haben. Klicken Sie um fortzufahren. 
+Am unteren Bildschirmrand, erscheint eine Grafik, die Ihnen zeigt wie viel Spielgeld Sie gerade haben. Je mehr Spielgeld Sie haben, desto laenger wird der Balken.Nun beginnen wir das Experiment. Haben Sie noch Fragen? Klicken Sie um fortzufahren.                                                                                                                                                        
+1
+2
+3
+4
+Waelen Sie eine Karte von einem Stapel
+Total:        
+ Auswahl:     
+ Belohnung:   
+ Strafe:      
+ Nettogewinn: 
+Vielen Dank fuer Ihre Teilnahme. Sie haben ein Total von 
+Glueckwunsch!
+Bitte informieren Sie den Untersuchungsleiter. Druecken Sie 'x' um zurueckzukehren.

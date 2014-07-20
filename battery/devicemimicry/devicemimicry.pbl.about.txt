@@ -1,0 +1,2 @@
+The PEBL Device Mimicry Task. A test proposed as part of the PEBL cognitive decathlon (see Mueller, 2009)
+This task has the participant learn control of an 8-df apparatus (two arms whose angle and length can be controlled).  The control is difficult, but can be learned with practice.

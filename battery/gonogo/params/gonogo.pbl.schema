@@ -1,0 +1,4 @@
+reps|32|Number of repetitions of P/R design (with trials shuffled) in each block
+isi|1500|Time between stimuli
+numP|4|Number of 'p' trials per block
+numR|1|Number of 'R' trials per block

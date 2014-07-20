@@ -1,0 +1,12 @@
+duration|60|Duration, in sec, of each block
+block*|a|easy addition
+block*|A|Hard addition
+block*|aA|block of mixed easy and hard addition
+block*|m|Easy multiplication block
+block*|M|Hard multiplication block
+block*|mM|A block containing mixed multiplication
+block*|aAmM|A block containing easy and hard addition + mult
+requirecorrect|1|Can you advance to next trial after error?
+givefeedback|1|Should correct/incorrect feedback be given
+shuffleblocks|1|should blocks be randomized
+allowErrors|1|Should you restart on error, or move on

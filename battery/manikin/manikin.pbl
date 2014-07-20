@@ -1,0 +1,114 @@
+#######################################################################
+##
+##  The PEBL Manikin test
+##
+##  A test of 3-D spatial reoreientation.
+##
+##  This test is for demonstration purposes only.
+##  It does not save data and does not have a complete
+##  experimental design.
+##
+## Carter, R., & Woldstad, J. (1985). Repeated measurements of spatial
+## ability with the manikin test. Human Factors: The Journal of the
+## Human Factors and Ergonomics Society, 27(2), 209-219.
+##
+##Damos, D. L. (1986). Development of a Computer-Based Naval Aviation
+##Selection Test Battery. NAVAL AEROSPACE MEDICAL RESEARCH LAB PENSACOLA
+##FL.
+
+
+
+define Start(p)
+{
+
+  gWin <- MakeWindow()
+   ##Get subject code if we need to:    
+    if(gSubNum+""=="0")
+    {
+	  gSubNum <- GetSubNum(gWin)
+    }
+
+  Draw()
+
+   MessageBox("This is a basic demo version of the classic 'Manikin'  test, a test of spatial reasoning.  It is not yet complete, but merely demonstrates how to present data from each of the 2^4 possible stimulus configurations. Press the space bar to cycle through each stimulus.",gWin)
+
+
+  gFront <- MakeImage("forward.png")
+  gBack <- MakeImage("back.png")
+  AddObject(gFront,gWin)
+  AddObject(gBack,gWin)
+  Move(gFront,gVideoWidth/2,gVideoHeight/2-100)  
+  Move(gBack,gVideoWidth/2,gVideoHeight/2-100)  
+  Hide(gFront)
+  Hide(gBack)
+  gFront.zoomX <- .6
+  gFront.zoomY <- .6
+  gBack.zoomX <- .6
+  gBack.zoomY <- .6
+
+
+  Trial(1,1,1,1)
+  Trial(1,1,-1,1)
+  Trial(1,-1,1,1)
+  Trial(1,-1,-1,1)
+  Trial(-1,1,1,1)
+  Trial(-1,1,-1,1)
+  Trial(-1,-1,1,1)
+  Trial(-1,-1,-1,1)
+
+
+  Trial(1,1,1,-1)
+  Trial(1,1,-1,-1)
+  Trial(1,-1,1,-1)
+  Trial(1,-1,-1,-1)
+  Trial(-1,1,1,-1)
+  Trial(-1,1,-1,-1)
+  Trial(-1,-1,1,-1)
+  Trial(-1,-1,-1,-1)
+   
+}
+
+
+define Trial(forback, updown, rightleft, squarecircle)
+{
+
+   xx <- gVideoWidth/2 
+   yy <- gVideoHeight/2-100
+
+   if(forback==1)
+     {
+         img <- gFront
+     }else {
+         img <- gBack
+     }
+
+   if(updown == 1)
+     {
+         #do nothing
+         img.rotation <- 0
+     }else{
+         img.rotation <- 180
+
+     }
+
+   if(squarecircle == 1)
+     {
+        targ <- Square(0,0,60,MakeColor("navyblue"),1)
+         
+     }else{
+        targ <- Circle(0,0,30,MakeColor("navyblue"),1)
+     }
+
+
+    pos <- forback * updown*rightleft
+
+    targ.x <- xx + pos*60
+	targ.y <- yy + updown*30
+    Show(img)
+    AddObject(targ,gWin)
+    Draw()
+    WaitForAnyKeyPress()
+    Hide(img)
+
+}
+

@@ -1,0 +1,7 @@
+Jus dalyvaujate eksperimente, kurio tikslas yra Teisingai priskirti pateikta korta atitinkamai vienai is esanciu eileje. Paspauskite bet kuri mygtuka ir pamatysite sia eile > >
+Jums bus pateikta serija kortu po viena. Kiekviena korta skiriasi spalva, forma ir formu skaiciumi. Jusu uzduotis yra penktaja korta priskirti vienai is pateiktu eileje,- pele paspaudus po ja esanti kvadrateli arba pacia korta. Priskyre korta matysite ar tai padarete teisingai ar ne. Teisingas atsakymas priklauso nuo rusiavimo taisykles, kuri jums nebus duota > >
+Eksperimento eigoje taisykle gali keistis. Tokiu atveju Jus turite kuo greiciau issiaiskinti kokia ji ir pagal ja toliau teisingai rusiuoti duotas kortas. Kad pradetumete eksperimenta, paspauskite bet kuri mygtuka > >
+Eksperimentas baigtas. Ramiai balsu praneskite "Baigiau" ir laukite tolesniu tyrejo nurodymu.Iseisite paspaude X.
+Priskirkite:
+Teisingai!
+Neteisingai!

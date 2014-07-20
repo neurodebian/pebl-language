@@ -1,0 +1,16 @@
+Vous etes sur le point de prendre part a une experience qui consiste a jouer avec de l'argent. Vous commencerez avec un montant de 2000 $. A chaque essai, vous devrez choisir une carte sur l'un des quatre tas. Apres avoir selectionne la carte, vous recevrez une recompense ou, eventuellement, payer une penalite. Votre but est de maximiser le profit sur votre montant de depart, et vous pouvez choisir n'importe quel tas  a tout moment. Cliquez sur la souris pour continuer.
+A chaque carte que vous tirerez, vous recevrez une recompense. Cette recompense depend du tas que vous choisirez et a chaque tas est associee une recompense constante chaque plate-forme a une remuneration constante. Vous obtiendrez egalement une penalite, qui vous coutera de l'argent. Les sanctions sont aleatoires - la penalite que vous obtiendrez est variable selon la carte. Parfois, la penalite sera de zero, parfois plus grande meme que la recompense que vous obtenez pour le choix de ce tas. Appuyez sur la souris pour continuer.
+Au bas de l'ecran, il y a un graphique qui vous montre votre  montant  actuel. Le plus d'argent vous avez, plus longue la barre sera.                                                                                                  Maintenant, vous allez commencer. Est-ce que vous avez des questions ?                                                                                       Appuyez sur la souris pour commencer.
+1
+2
+3
+4
+Vous devrez choisir une carte avec la souris.
+Total: $
+ Choix:   
+ Recompense:  $
+ Penalite: $
+ Score net: $
+Merci de votre participation dans l'experience. Vous avez gagne  $
+Felicitation!
+C'est fini. S'il vous plait, alerter l'experimentateur que vous avez termine.

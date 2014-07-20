@@ -1,0 +1,15 @@
+Za chwilę weźmiesz udział w badaniu, w którym Twoim zadaniem będzie dopasowywanie do
+siebie kart pod względem pojawiających się na nich elementów. Na początku zobaczysz
+zestaw 4 kart wzorcowych. Naciśnij dowolny klawisz aby je zobaczyć.Każda spośród 4
+kart różni się od pozostałych kształtem, barwą i liczbą figur. Wraz z rozpoczęciem
+badania na dole ekranu ukazywała się będzie pojedyncza karta, którą należy dopasować
+do jednej z 4 górnych kart pod względem kształtu, barwy lub liczby figur. Aby to
+zrobić, kliknij przyciskiem myszy na jednej spośród 4 kart. Nie będziesz
+otrzymywała/-ał informacji o tym według jakiej zasady dopasowywać karty, ale po
+każdej próbie otrzymasz informację czy udzieliłaś/-eś poprawnej odpowiedzi. Jeżeli
+jesteś gotowa/-y, powiadom o tym osobę nadzorującą przebieg badania i naciśnij
+dowolny przycisk by rozpocząć.Dziękujemy!
+Kliknij przyciskiem myszki na kartę 1, 2, 3 lub 4 aby dopasowac kartę
+DOBRZE!
+ZLE!
+

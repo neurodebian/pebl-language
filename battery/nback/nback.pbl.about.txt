@@ -1,0 +1,15 @@
+PEBL N-Back Test, with dual N-Back options
+Settings allow for either single or dual N-Back with 
+a variety of settings, including spatial, by specifiying 
+dim1 and dim2, which need to be different. Options:
+dim2: squares or none       (dim2 only)
+
+dim1:   "consonants-a"  (Auditory consonants)
+  ##  "consonants-v"  (Visual consonants)
+  ##  "consonants-av" (both audio and visual)
+
+  ##  "numbers-a"     (auditory numbers)
+  ##  "numbers-v"     (visual numbers)
+  ##  "numbers-av"     (visual numbers)
+  ##  "none"          (either dimension)
+

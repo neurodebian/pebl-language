@@ -1,0 +1,363 @@
+define Start(p)
+{
+
+   gVideoWidth <- 1440
+   gVideoHeight <- 900
+   gHomeX <- gVideoWidth/2
+   gHomeY <- gVideoHeight/2
+   gSleepEasy <- 1
+   gWin <- MakeWindow()
+	
+   dat <- ReadCSV("test.csv")
+
+   Print(dat)
+
+   vals <- TextToNum(Third(Transpose(dat)))
+   x <-  BarPlot(vals,"","Hello World","Seconds",gWin)
+   Draw()
+   WaitForAnyKeyPress()
+   RemoveComplex(x)
+   x <-  BarPlot([1,10,3,4],"","Goodbye","Seconds",gWin)
+   Draw()
+   WaitForAnyKeyPress()
+   RemoveComplex(x)
+
+  ##We basically want to be able to plot
+  ##some numbers in a barplot.
+
+}
+
+define TextToNum(list)
+{
+   x <- []
+   loop(i,list)
+    { 
+      x <- Append(x, ToNumber(i))
+    }
+  return x
+}
+
+define BarPlot(data,labels,title,ylab,win)
+{
+
+    xmin <- 10
+    xmax <- gVideoWidth -xmin
+    ymin <- 10
+    ymax <- gVideoHeight-ymin
+
+    ##Location of the min and max y in pixels
+    ## remember that y coordinates are inverted from 'normal'
+    ybottom <- ymax -  200
+    ytop  <- ymin + 40
+    xbottom <- xmin + 120
+    xtop    <- xmax - 20
+
+    ##parameters for how to draw picture.
+    maxbarwidth <- 150
+    minbarspace <- 20
+   
+    
+    ##range of the data.
+	datamin <- 0
+    datamax <- Max(data)
+
+    ##Data value max to plot.
+    plotmax <- Ceiling(datamax * 1.2)
+    plotmin <- Min([0,datamin])
+
+    ##Numbers per pixel:  
+    scale <-  (ybottom-ytop)/(plotmax-plotmin)
+
+
+    numdat <- Length(data)
+    ##Compute 'real' plot width'
+
+    ##numdat + barwidth + (numdat-1) * space = (xmax-xmin)
+
+    barwidth <- Min([((xtop-xbottom-10) -  (numdat)*minbarspace)/numdat,maxbarwidth])
+    barspace <- ((xtop-xbottom-10) - numdat*barwidth)/(numdat)
+
+
+    bgcol <- MakeColor("steelblue")
+    fgcol <- MakeColor("navyblue")
+    black <- MakeColor("black") 
+     objs <- []
+
+    ##Make a background field
+    bg <- Rectangle(gHomeX, gHomeY, (xmax-xmin), (ymax-ymin), bgcol,1)
+    AddObject(bg,win)
+    objs <- Append(objs,bg)
+
+    ##Make bars
+    curx <- xbottom+barwidth/2 + barspace/2
+    jumpx <- barwidth+barspace
+    loop(val,data)
+	{
+       hght <- scale*val
+       bar <- Rectangle(curx,ybottom-hght/2,barwidth,hght,fgcol,1)
+
+	   AddObject(bar,win)
+       objs <- Append(objs,bar)
+       curx <- curx + jumpx
+    }
+
+
+   ##Make a title
+   titlefont <- MakeFont("Vera.ttf",0,44,black,bgcol,1)
+   labfont <- MakeFont("Vera.ttf",0,22,black,bgcol,1)
+   titlelab <- MakeLabel(title,titlefont)
+   AddObject(titlelab,win)
+   Move(titlelab,gHomeX,ytop)
+   objs <- Append(objs,titlelab)
+
+
+   ##Make two axes
+   xaxis <- ThickLine(xbottom,ybottom, xtop, ybottom, 3, black)
+   yaxis <- ThickLine(xbottom,ybottom,xbottom,ytop,3,black)
+   AddObject(xaxis,win)
+   AddObject(yaxis,win)
+   objs <- Append(objs,xaxis)
+   objs <- Append(objs,yaxis)
+
+
+   ##Now, determine the tick unit.  It should be the nearest power of
+   tick <- 10^Floor(LogN(plotmax/2,10))
+   i <- 0
+   curtick <- ybottom - tick * scale * i
+
+   while(curtick >= ytop)
+    {
+
+      val <- tick *i
+      lab <- MakeLabel(val+"",labfont)
+      AddObject(lab,win)
+      Move(lab,xbottom-35,curtick)
+      objs <- Append(objs,win)
+
+      tmp <- ThickLine(xbottom-10, curtick, xbottom, curtick, 2, black)
+      AddObject(tmp,win)
+      objs <- Append(objs,win)
+  
+
+      i <- i + 1
+      curtick <- ybottom - tick * scale * i
+    }
+   
+    lab <- MakeLabel(ylab,titlefont)
+    lab.rotation <- 90
+    AddObject(lab,win)
+    Move(lab,xbottom-80,(ytop+ybottom)/2)
+    objs <- Append(objs,lab)
+
+   return objs
+}
+
+##Gets an angle, in degrees, of an X,Y vector
+define GetAngle(dx, dy)
+{
+
+  baseangle <- RadToDeg(ATan(dy/dx))
+  
+  ##Ultimate angle depends on the quadrant, if you use ATN
+  if(dx >0 and dy > 0)  ##1st quadrant
+   {
+       ret <- baseangle
+   } elseif(dx<0 and dy> 0) {         ##2nd quadrant
+       ret <- 180+baseangle 
+   } elseif(dx<0 and dy<0) {          ##3rd quadrant
+       ret <- 180+baseangle
+   } else {                           ##4th quadrant
+       ret <- 360+baseangle
+   }
+
+   return Mod(ret,360)
+}
+
+##remove quotes from outside of text (but not the inside)
+define StripQuotes(text)
+{
+   start <- 1
+   end <- StringLength(text)
+  
+   if(end > 0)
+   {
+
+   if(SubString(text,end,1)==gQuote)
+    {
+      end <- end - 1
+    }
+   if(SubString(text,1,1)== gQuote)
+    {
+      start <- 2
+      end <- end -1
+    }
+
+   ret <- SubString(text,start,end)
+
+   } else {
+    ret <- text
+   }
+   return ret
+}
+
+
+## This will read a CSV file into a nested list.  The CSV file should
+## allow quoted text, and not break on commas within quotes.
+
+define ReadCSV(filename)
+{
+
+
+  #open the file
+  file <- FileOpenRead(filename)
+  
+  char <- FileReadCharacter(file)
+
+  ##Process each line until the end of the file.
+  table <- [] 
+  while(not EndOfFile(file))
+   { 
+    line <- []
+    inquote <- 0
+    token <- ""
+   
+    ##Process each character in the line.
+    while(not EndOfLine(file))
+    {
+
+
+      ##Determine what to do with it:
+      if(char == gQuote and (not inquote))
+       {
+         inquote <- 1
+         token <- token + char
+
+       }elseif(char ==gQuote and inquote)
+       {
+         inquote <- 0
+         token <- token + char
+
+       }elseif(char == "," and (not inquote))
+	   {
+
+          line <- Append(line,StripQuotes(token))
+          token <- ""
+         
+       }else{
+
+         token <- token + char
+       }
+       
+     char <- FileReadCharacter(file)
+    }
+
+    ##Add the last character onto the token
+      ##Determine what to do with it:
+      if(char == gQuote and (not inquote))
+       {
+         inquote <- 1
+         token <- token + char
+
+
+       }elseif(char ==gQuote and inquote)
+       {
+         inquote <- 0
+         token <- token + char
+
+       }elseif(char == "," and (not inquote))
+	   {
+
+          line <- Append(line,StripQuotes(token))
+          token <- ""
+         
+       }else{
+
+         token <- token + char
+       }
+
+
+    ##Add the token onto the line
+    line <- Append(line,StripQuotes(token))
+
+    ##Add the line onto the table 
+    if(not EndOfFile(file))
+     {
+	     table <- Append(table,line)
+     }
+
+    #eat and discard the newline character
+    FileReadCharacter(file)
+    char <- FileReadCharacter(file)
+
+	}
+
+  return table
+}
+
+
+define Enquote(text)
+{
+ return gQuote + text + gQuote
+}
+
+
+
+
+define MakeCSVLine(list)
+{
+  txt <- ""
+
+  loop(i,list) 
+   {
+     txt <- txt + i + ", "
+   }
+ return txt
+}
+
+
+define ThickLine(x1,y1,x2,y2,size,color)
+{
+
+  ##Makes a 'thick' line
+
+  midx <- (x1+x2)/2
+  midy <- (y1+y2)/2
+
+  dx1 <- x1 - midx
+  dx2 <- x2 - midx
+  dy1 <- y1 - midy
+  dy2 <- y2 - midy 
+
+  ##Compute line slope.
+  angle <- GetAngle((x2-x1),(y2-y1))
+  
+  tan1 <- DegToRad(Mod(360+angle+90,360))
+  tan2 <- DegToRad(Mod(360+ angle-90,360))
+
+  
+  #get new '1' points.
+  x1a <- dx1 + size/2 * Cos(tan1)
+  x1b <- dx1 + size/2 * Cos(tan2)
+  y1a <- dy1 + size/2 * Sin(tan1)
+  y1b <- dy1 + size/2 * Sin(tan2)
+
+  x2a <- dx2 + size/2 * Cos(tan1)
+  x2b <- dx2 + size/2 * Cos(tan2)
+  y2a <- dy2 + size/2 * Sin(tan1)
+  y2b <- dy2 + size/2 * Sin(tan2)
+
+  xs <- [x1a,x1b,x2b,x2a]
+  ys <- [y1a,y1b,y2b,y2a]
+
+  return Polygon(midx,midy, xs,ys,color,1)
+}
+
+
+define RemoveComplex(targs)
+{
+ 
+   loop(i, targs)
+   {
+     RemoveObject(i,gWin)
+   }
+}

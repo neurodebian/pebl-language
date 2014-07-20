@@ -1,0 +1,11 @@
+fontsize|12|Font size to display local stimulus and to use as a template for the global stimulus
+globalsize|200|Width in pixels of global stimulus
+reps|10|Number of trials per condition in each block
+showcache|1|Whether the navon stimuli should be shown at the beginning of the script as they are created.  Useful to let you know things are working.
+scalestamp|0|Whether, in the navon stimuli, the stamp size should be scaled to reflect the amount of whitespace on the template
+stampongrid|1|Whether stamps should be made in a grid pattern (1) or adjusted to fit the center of th whitespace in that grid (0).  With scalestamp=1, stampongrid could be 0.
+stim1|H|Stimulus for left response
+stim2|S|Stimulus for right response
+stimdummy|█|Neutral dummy stimulus.  Navon used more of a O. Could also try ▓█▄
+giveErrorfeedback|1|Should error feedback be given on each trial
+doscatterconditions|1|Should you include 'scatter' conditions as blocks 6/7.

@@ -1,0 +1,67 @@
+define Start(p)
+{ 
+
+
+  server <- "www.obereed.net"
+  file <- "/latestpeblversion.txt"
+  file2 <- "/latestpeblversion2.txt"  ##does not exist
+
+#  resp <- GetHTTPFile(server,file,"latest.txt")
+#  Print("Should be 200:"+resp)
+#  resp2 <- GetHTTPFile(server,file2,"latest2.txt")
+#  Print("Should be 404:" +resp2)
+#  resp3 <- GetHTTPFile(server,"test.html","test.html")
+#  Print("Should be 400:" +resp3)
+
+
+  resp <- GetHTTPText(server,file)
+  Print("Should be 200:"+resp)
+#  resp2 <- GetHTTPText(server,file2)
+#  Print("Should be 404:" +resp2)
+
+if(0)
+ {
+loop(i,files)
+    {
+       Print("Getting: " + i)
+       
+      out <-  GetHTTPFile(server,i,"tmp.png")
+      Print("MD5:"+MD5File("tmp.png"))
+      SystemCall("md5sum tmp.png")
+      Print("out:"+out)
+
+    }
+}
+
+}
+
+define XXX()
+{
+  gVideoWidth <- 800
+  gVideoHeight <- 600
+  gSleepEasy <- 1
+
+  gWin <- MakeWindow()
+  gSleepEasy <- 1
+
+  Draw()
+
+  pebl <- MakeImage("pebl.png")
+  AddObject(pebl,gWin)
+  Move(pebl,gVideoWidth/2,gVideoHeight/2)
+
+ l1 <- Line(gVideoWidth/2,gVideoHeight/2,200,200,MakeColor("black"))
+ AddObject(l1,gWin)
+
+ Print(pebl)
+ Print(l1)
+  Draw ()
+  Print("Done with expt" + GetTime())
+  WaitForAnyKeyPress()
+#  pebl.x <- 400
+#  pebl.y <- 300
+   Move(pebl,400,300)
+  Draw()
+ WaitForAnyKeyPress()
+}
+

@@ -1,0 +1,7 @@
+Vous êtes sur le point de participer à une expérimentation dans laquelle vous devrez classer des cartes en vous fondnat sur les symboles qui y sont représentés. Pour commencer, vous allez voir quatre piles (cliquez sur la souris pour voir les quatre piles.) 
+Chaque pile a un chiffre, une couleur et un symbole différents. Vous allez voir une série de carte et vous devrez déterminer à quelle pile appartient chaque carte. Pour chaque nouvelle carte, cliquez avec le pointeur de la souris sur la pile correspondant à votre choix. La réponse correcte dépends d'une règle, mais vous ne saurez pas de quelle règle il s'agit. Cependant, à chaque essai on vous indiquera si la réponse est correcte ou non. Cliquez sur la souris pour continuer. 
+Pour finir, les règles peuvent changer pendant la tâche, quand ce sera le cas, vous devez comprendre qu'elle est la nouvelle règle aussi rapidement que possible et vous adaptez à la nouvelle règle. Cliquez sur la souris pour commencer. 
+Vous devez maintenant quittez le programme. S'il vous plait, informez l'expérimentateur que vous avez fini. Cliquez sur la souris pour conclure. 
+Cliquez sur une pile pour classer la carte
+Correct!
+Incorrect

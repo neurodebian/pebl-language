@@ -1,0 +1,1656 @@
+#!/usr/bin/env pebl
+##  This is a PEBL script that acts as a cross-platform 
+##  launcher for PEBL.
+##  Version 0.2: Initial release, to accompany PEBL 0.13.
+##  (c) 2011-2012 Shane T. Mueller, Ph.D. smueller@obereed.net
+##
+
+define Start(p)
+{
+
+  gUseReloc <-  0  ##Set this from 0 to 1 if you want to run on windows 
+                   ## NOT from an installation in Program Files, but from
+                   ##A PEBL subdirectory of the current working directory.
+ 
+ ##Set this from 1 to 0 to turn off automatic subject code incrementation
+ ##it increments the previous code by one, to avoid overwriting
+ gAutoSubCode <- 1
+
+ gLastUpdate <- GetTime() ##keep track of updates
+
+ gScreenresInitial <- GetCurrentScreenResolution()
+
+###set the configuration/chain name: use 'default' as default.
+  if(Length(p) >0)
+   {
+       gConfigName <- First(p)
+	   if(gConfigName==0)
+        {
+           gConfigName <- "default"
+        }
+   }else{
+       gConfigName <- "default"
+   }
+
+
+
+
+  ## todo: 
+  ## concatenate data files
+  ## open battery.txt file
+
+  ##This allows you to open up the description file directly.
+  gEditDescription <- 1
+
+  systemType <- GetSystemType()
+
+   gFilters <- ["*.pbl" , "data files","*.*"]
+
+  if(systemType == "LINUX") 
+   {
+
+    gViewerCommand <- "gedit"
+    gPEBLName      <- "pebl"
+    gOpenManual    <- "acroread /usr/local/share/pebl/doc/PEBLManual0.13.pdf&"
+    gOpenURL        <- "firefox"
+    gManualLoc      <- "/usr/local/share/pebl/doc/PEBLManual0.13.pdf"
+
+		
+   }elseif(systemType=="WINDOWS")   {
+     
+     gViewerCommand <- "c:\windows\notepad.exe"  ##Not used
+#     gPEBLName      <- "c:\Progra~1\PEBL\bin\pebl.exe "
+     gPEBLName     <- gQuote+"%ProgramFiles%\PEBL\bin\pebl.exe"+gQuote+ " "
+     gOpenManual    <- ""
+#     gManualLoc     <-  gQuote+"%ProgramFiles%\PEBL\doc\PEBLManual0.13.pdf"+gQuote
+     ##This shouldn't be hard-coded; but for now, change to localize.
+     gManualLoc    <- "C:\Program Files\PEBL\doc\PEBLManual0.13.pdf"
+     gOpenURL       <- ""
+
+
+   }elseif(systemType == "OSX")
+   {
+     gViewerCommand <- "open"
+     gPEBLName      <- "/opt/local/bin/pebl"
+     gOpenManual    <- "acroread /opt/local/share/pebl/doc/PEBLManual0.13.pdf"
+   }
+
+   gSleepEasy <- 1
+
+
+   ReadConfigFile(gConfigname)
+
+
+
+   if(gScreenSize =="large")
+   {
+     gVideoWidth <- 1000
+     gVideoheight <- 700
+   }elseif(gScreenSize=="small")
+   {
+     gVideoWidth <- 1000
+     gVideoheight <- 600
+   }
+
+   win <- MakeWindow()
+
+
+  ##Now, determine the proper translation strings.
+  GetStrings(gLanguage)
+
+  if(gFullscreen)
+    {
+      fstext  <- "X"
+    } else { 
+      fstext <- ""
+    }
+  if(gNimhdemographics)
+    {
+	  demotext <- "X"
+    }else{
+	  demotext <- ""
+    }
+
+
+   ##keep track of the offset/select pairs when you move to new directories.
+   selectStack <- []
+   gselected <-1     #Which item is selected in the fileview
+   offset <- 0      #offset in the fileview
+
+
+
+   logFile <- FileOpenAppend("PEBLLaunch-log.txt")
+
+
+   ##This controls the size of the file window.
+   width <- 200
+   if(gScreenSize=="small")
+   {
+     height <- 400
+   }else{
+     height <- 500
+   }
+
+   gutter <- 10   
+
+   xbase <- 10
+   ybase <- 100
+   gYbase <- ybase
+   gDirchain <- ["."]  ##this is a history of the directories you have 
+                      ##navigated to.
+
+
+
+   fontsize <- 11
+   font <- MakeFont(gPEBLBaseFont,0,fontsize,MakeColor("black"),MakeColor("white"),1)
+
+   gfilelist <- FilterDir(GetDirectoryListing(DirlistToText(gDirChain)),gDirChain,First(gFilters))
+   gFlatfilelist <- Flatten(gfilelist)
+   
+
+   if(gScreenSize=="small")
+   {
+     adjust <- 100
+   }else{
+     adjust <- 0
+   }
+ 
+ 
+
+
+
+
+   run        <- MakeButton(xbase+100,ybase-30,200,win,gRuntext)
+   edit       <- MakeButton(xbase+55,ybase+height+20,120,win,gOpenText)
+   exit       <- MakeButton(xbase+55,ybase+height+50,120,win,gExitText)
+   viewoutput <- MakeButton(xbase+200,ybase+height+20,150,win,gViewDebugText)
+   viewerror  <- MakeButton(xbase+200,ybase+height+50,150,win,gViewErrorText)
+
+   addtochain <- MakeButton(xbase+300,ybase+height+20-100,120,win,gAddToChainText)
+   clearchain <- MakeButton(xbase+300,ybase+height+50-100,120,win,gClearChainText)
+   savechain <- MakeButton(xbase+430,ybase+height+50-100,120,win,gSaveChainText)
+   loadchain <- MakeButton(xbase+430,ybase+height+20-100,120,win,gLoadChainText)
+
+
+
+   ##upper right buttons
+   openmanual <- MakeButton(630,50,130,win,gOpenManualText)
+   about      <- MakeButton(770,50,130,win,gAboutLabelText)
+   launchsize  <- MakeButton(630,75,130,win,gSizeText+gScreenSize)
+   visitweb <- MakeButton(770,75,130,win,gWebText)
+   wiki     <- MakeButton(910,50,130,win,gWikiText)
+
+
+   transmit <- MakeButton(910,75,130,win,"Transmit data")
+   review   <- MakeButton(630,100,130,win,"Review PEBL")
+
+
+   ##################################################
+   ##  
+   ##  graphical widgets related to the chain launcher.
+
+   ##chain-launcher
+   chaintitle <- EasyLabel(gExpChainText+gConfigName,xbase+210+150,290,win,18)
+   chainlist <- EasyTextBox("",xbase+210,300,win,fontsize,300,200-adjust)
+   chainlist.linewrap <- 0
+   chainlist.text <- MakeExpChainText(gexpchain)
+
+
+   launchchain <- MakeButton(chaintitle.x,chaintitle.y-20,200,win,gLaunchChainText)
+ 
+
+   bg <- MakeCanvas(200,500-adjust,MakeColor("grey20"))
+   AddObject(bg,win)
+   MoveCorner(bg,xbase,ybase)
+
+   
+   path <- EasyLabel(DirListToText(gDirChain),(xbase+width/2), ybase-10, win,fontsize)
+   yheight <- path.height
+   gYHeight <- yHeight
+
+   gPortalnum <- Floor((bg.height-gutter*4)/yheight)
+   portalheight <- yheight*gPortalNum
+
+   gPortal <- MakeTextBox("",font,width-gutter*3,portalheight)
+
+   gPortal.linewrap <-0
+   AddObject(gPortal,win)
+
+   Move(gPortal,xbase+gutter,ybase+gutter*2)
+
+
+   description <- MakeTextBox(gNoDesc,font,420,240-adjust)
+   AddObject(description,win)
+   Move(description,570,115)
+
+#   title <- EasyLabel(gPEBLTitle+ GetPEBLVersion(),gVideoWidth/2,20,win,30)
+   title <- EasyLabel(gPEBLTitle+ "0.14",gVideoWidth/2,20,win,30)
+
+   screenshotbase <- Rectangle(780,530-adjust,420,320,MakeColor("black"),1)
+   screenshotdummy <- Rectangle(780,530-adjust,400,300,MakeColor("white"),1)
+   AddObject(screenshotbase,win)
+   AddObject(screenshotdummy,win)
+   screenshot <- screenshotdummy
+
+   gSelection <- Rectangle(gPortal.x+gPortal.width/2,0,gPortal.width,yheight,MakeColor("black"),0)
+   
+   up <- Polygon(xbase+width-gutter,ybase+gutter,[-5,5,0],[5,5,-5],MakeColor("grey"),1)
+   down <- Polygon(xbase+width-gutter,gPortal.y+gPortal.height+gutter,[-5,5,0],[-5,-5,5],MakeColor("grey"),1)
+   
+   upbg <- Square(xbase+width-gutter, ybase+gutter,  10,MakeColor("grey"),0)
+   downbg <- Square(xbase+width-gutter, gPortal.y+gPortal.height+gutter, 10,MakeColor("grey"),0)
+
+
+   gThumb <- Rectangle(xBase+width-gutter,ybase+gutter+20,10,20,MakeColor("grey40"),1)
+   slidebin <- Rectangle(xBase+width-gutter,gPortal.y+gPortal.height/2,10,gPortal.height,MakeColor("grey70"),1)
+
+
+   subjectbox <- EasyTextBox(gsubcode,xbase+width+150,ybase,win,fontsize,60,yheight)
+   sublabel   <- EasyLabel(gPartCode, xbase+width+70,subjectbox.y+subjectbox.height/2,win,fontsize)
+   MoveCorner(sublabel,subjectbox.x-sublabel.width-10,subjectbox.y)
+   subboxhighlight <- Rectangle(subjectbox.x+subjectbox.width/2,subjectbox.y+subjectbox.height/2,subjectbox.width,subjectbox.height,MakeColor("red"),0)
+   AddObject(subboxhighlight,win)
+   Hide(subboxhighlight)
+
+   subplusbutton <-  MakeButton(subjectbox.x+subjectbox.width+20,subjectbox.y+5,20,win,"+")
+
+   filter    <- MakeButton(xbase+100,ybase+height-20,100,win,"*.pbl")
+
+###Experimenter code box:
+   expbox <- EasyTextBox(gexperimenter,xbase+width+150,ybase+40,win,fontsize,60,yheight)
+   explabel   <- EasyLabel(gExperCode, expbox.x,expbox.y,win,fontsize)
+   MoveCorner(explabel,expbox.x-explabel.width-10,expbox.y)
+   expboxhighlight <- Rectangle(expbox.x+expbox.width/2,expbox.y+expbox.height/2,expbox.width,expbox.height,MakeColor("red"),0)
+   AddObject(expboxhighlight,win)
+   Hide(expboxhighlight)
+
+
+### Language box:
+   langbox <- EasyTextBox(glanguage,xbase+width+150,ybase+80,win,fontsize,60,yheight)
+   langlabel   <- EasyLabel(gLangCode, langbox.x,langbox.y,win,fontsize)
+   MoveCorner(langlabel,langbox.x-langlabel.width-10,langbox.y)
+   langboxhighlight <- Rectangle(langbox.x+langbox.width/2,langbox.y+langbox.height/2,langbox.width,langbox.height,MakeColor("red"),0)
+   AddObject(langboxhighlight,win)
+   Hide(langboxhighlight)
+
+
+###Command-line options:
+   clobox <- EasyTextBox(gCommandLineText,langbox.x,langbox.y+20,win,fontsize,200,yheight)
+   clolabel   <- EasyLabel(gCommandLineOptions, expbox.x,expbox.y,win,fontsize)
+   MoveCorner(clolabel,clobox.x-clolabel.width-10,clobox.y)
+   cloboxhighlight <- Rectangle(clobox.x+clobox.width/2,clobox.y+clobox.height/2,clobox.width,clobox.height,MakeColor("red"),0)
+   AddObject(cloboxhighlight,win)
+   Hide(cloboxhighlight)
+
+
+### screen resolution
+   screenselection <- Easylabel(gScreenRes,expbox.x+expbox.width/2,expbox.y+expbox.height+15,win,fontsize)
+   screenback <- Rectangle(screenselection.x,screenselection.y,screenselection.width+6,screenselection.height,MakeColor("black"),0)
+   AddObject(screenback,win)
+   screenlabel <- EasyLabel(gScreenResLabel,expbox.x,expbox.y+20,win,fontsize)
+   Move(screenlabel,screenselection.x-screenlabel.width/2-screenselection.width/2-10,screenselection.y)
+
+
+
+#####################################
+   ##Fullscreen checkbox:
+   fullscreenbox    <-EasyTextBox(fstext,           xbase+width+10,ybase+120,win,fontsize,yheight,yheight)
+   fullscreenlabel  <- EasyLabel(gFullText, xbase+width+70,ybase+120+yheight/2,win,fontsize)
+   MoveCorner(fullscreenlabel,xbase+width+30,ybase+120)
+
+   ##Demographics checkbox:
+   demobox    <-EasyTextBox(demotext,             xbase+width+130,ybase+120,win,fontsize,yheight,yheight)
+   demolabel  <- EasyLabel(gCollectdemoText, xbase+width+230,ybase+120+yheight/2,win,fontsize)
+   MoveCorner(demolabel,xbase+width+150,ybase+120)
+
+
+
+
+   AddObject(slidebin,win) 
+   AddObject(upbg,win)
+   AddObject(up,win)
+   AddObject(downbg,win)
+   AddObject(down,win)
+   AddObject(gThumb,win)
+   AddObject(gSelection,win)
+
+
+
+
+##Some state variables are initialized here
+
+
+
+
+   gPortal.text <- DirToText(First(gfilelist),Second(gfilelist),offset,gDirChain)
+
+   gSelection.y <- gPortal.y+yheight*(gselected-.5)
+   Draw()
+   cont <- 1
+   while(cont)
+    { 
+
+
+
+     gSelection.y <- gPortal.y+yheight*(gselected-.5-offset)
+     thumby <- (offset / (Length(gflatfilelist)-gPortalNum-1))*(portalHeight-gutter*2)
+     gPortal.text <- DirToText(First(gfilelist),Second(gfilelist),offset,gDirChain)
+
+     ##find out if there is a text description of the selected text.
+
+	 ##Make sure selected didn't get off the end of the list because
+	 ##of filtering or whatnot.
+	 gSelected<- Min([gSelected,Length(gFlatFileList)])
+      
+	 descname <- DirListToText(gDirChain)+Nth(gflatfilelist,gselected)+".about.txt"
+	 path.text <- DirListToText(gDirChain)
+  	 MoveCorner(path,xbase+2,ybase-18)
+
+	 if(FileExists(descname))
+      {
+
+	     text <- FileReadText(descname)
+		 description.text <-  text 
+      } else {
+         description.text <- gNoDesc
+      }
+
+     screenname <-DirListToText(gDirChain)+Nth(gFlatFileList,gselected)+".png"
+
+	 if(FileExists(screenname))
+      {
+
+	     RemoveObject(screenshot,win)
+	     screenshot <- MakeImage(screenname)
+
+	     AddObject(screenshot,win)
+
+ 	     ##scale to 400x300
+	     scalew <- 400/screenshot.width  
+	     scaleh <- 300/screenshot.height
+	     scale <- Min([scalew,scaleh])
+
+	     screenshot.zoomX <- scale
+	     screenshot.zoomY <- scale
+
+	     Move(screenshot,780,530-adjust)
+
+      } else {
+	  
+	     RemoveObject(screenshot,win)
+	     screenshot <- screenshotdummy
+	     AddObject(screenshot,win)
+
+
+      }
+	  
+
+	 #make sure thumb fits inside its channel.
+	 gThumb.y <- Max([Min([thumbY+ybase+gutter*2,slidebin.y+slidebin.height/2-gutter]),gPortal.y+gutter])
+
+     Draw()
+
+     tmp <-	 WaitForClickOnTarget([gPortal,upbg,downbg,exit,slidebin,
+					run,subjectbox,fullscreenbox,expbox,langbox,
+    				   addtochain,clearchain,launchchain,viewoutput,viewerror,
+				   edit,openmanual,launchsize,visitweb,about,
+				   description,demobox,savechain,loadchain,wiki,
+                                   subplusbutton,clobox,filter,transmit,review,screenselection],
+				   [1,2,3,4,5,
+				   6,7,8,9,10,
+				   11,12,13,14,15,
+				   16,17,18,19,20,
+				   21,22,23,24,25,
+				   26,27,28,29,30,
+				   31])
+
+	 if(tmp==1)  #Click was on the portal.
+      {
+
+	      ##update selection rectangle here
+	      clicky <- Second(gClick)
+		  newselected <- Floor((clicky-gPortal.y)/yheight)+1 + offset
+
+		  ##if we click past the last entry, don't adjust selection
+		  if(newselected > Length(gFlatFileList))
+          {
+		      gselected <- gselected ##do nothing
+          }elseif(gselected == newselected)
+ 		   {
+
+     	     if(IsDirectory(DirListTotext(gDirChain)+Nth(gFlatFileList,gselected)))
+              {		
+
+
+               gDirChain <- AppendDirlist(gDirChain,Nth(gFlatFileList,gselected))
+			   if(Length(gDirChain)<(Length(selectstack)+1))
+               {	
+
+			      ##we are backing up.
+				  last <- Nth(selectstack,Length(selectstack))
+				  gselected <- 	First(last)
+			      offset <- Second(last)
+
+
+				  ##Remove the last item.
+				  if(Length(selectstack)<=1)
+                  { 
+                    selectStack <- []
+                  } else {
+    
+    			      selectStack <-SubList(selectstack,1,Length(selectstack)-1)
+				  }
+       		     gfilelist <- FilterDir(GetDirectoryListing(DirlistToText(gDirChain)),gDirChain,First(gFilters))
+         		 gFlatFileList <- Flatten(gfilelist)
+
+ 			   }elseif(Length(gDirChain)>Length(selectstack))
+               {
+			     #We opened a new subdirectory.
+                 selectStack <- Append(selectstack,[gselected, offset])
+       		     offset <- 0
+			
+        		   gfilelist <-  FilterDir(GetDirectoryListing(DirlistToText(gDirChain)),gDirChain,First(gFilters))
+         		   gFlatFileList <- Flatten(gfilelist)
+
+     		   gselected <- Length(First(gfilelist)) + 1
+      		   if(gselected > Length(gFlatFileList) or 
+    		      gselected > gPortalNum)
+                    {
+                      gselected <- 1 
+                    }
+               }
+
+              }            
+            } else {
+		      gselected <- newselected
+           }
+      }elseif(tmp==2)  ## up arrow
+      {
+	    offset <- Max([offset - 1,0])
+
+        if(gselected<=offset)
+          {
+		    gselected <- offset + 1
+          }
+        if(gselected > offset+gPortalNum)
+          {
+		    gselected <- offset+gPortalNum
+          }
+
+      }elseif(tmp==3) ## down arrow
+      {
+	    offset <- Min([offset+1, Length(gFlatFileList)-gPortalNum])
+		gselected <- Max([offset+1,gselected])
+
+
+      }elseif(tmp == 5) ##click on the slider bin
+      {
+	    
+
+
+		filelen <- Length(gFlatFileList)
+		if(filelen <= gPortalNum)
+         {
+           offset <- 0
+
+         } else {
+
+         clicky  <- Second(gClick)
+		 
+		 proportion <- ((clicky - gPortal.y)/gPortal.height)
+
+		 offset  <- Floor(proportion * (filelen - gPortalNum))
+		 if(gselected < offset)
+          {
+             gselected <- offset+1
+          }
+		  if(gselected>offset+gPortalNum)
+		  {
+		     gselected > offset+gPortalNum
+   		  }
+
+		  ##
+		  ##now, 'capture the thumb' until you upclick
+		  ##
+ 		  #  RegisterEvent("<MOUSE_MOVEMENT>",1,1 ,"<TRUE>","UPDATECAPTUREDTHUMB", [1])
+		  #  RegisterEvent("<MOUSE_BUTTON>",1,1,"<TRUE>","CLEARTHUMBCAPTURE", [1])
+          #  out <-  StartEventLoop()
+          #  ClearEventLoop()
+
+
+         }
+      }elseif(tmp ==4) ##Exit
+      {
+
+
+       PushButton(exit)
+	   Saveconfig(gconfigname)
+
+	     cont <- 0
+      }elseif(tmp==6) ##hit 'run'
+      {
+         PushButton(run)
+
+	     if(IsDirectory(DirListTotext(gDirChain)+Nth(gFlatFileList,gselected)))
+         {		
+
+
+           gDirChain <- AppendDirlist(gDirChain,Nth(gFlatFileList,gselected))
+		   gfilelist <- FilterDir(GetDirectoryListing(DirlistToText(gDirChain)),gDirChain,First(gFilters))
+		   gFlatFileList <- Flatten(gfilelist)
+ 		   gselected <- Length(First(gfilelist)) + 1
+		   if(gselected > Length(gFlatFileList) or 
+		      gselected > gPortalNum)
+            {
+              gselected <- 1 
+            }
+		   offset <- 0
+
+
+         } else {
+
+       	  if(gnimhdemographics)
+    	  {
+	      	  GetNIMHDemographics(gsubcode,win,"demographics-log.csv")
+          }
+
+             RunScript(gDirChain,Nth(gFlatFileList,gselected),gfullscreen,glanguage,logfile,gsubcode,gexperimenter)
+
+
+	      if(gAutoSubCode)
+           {
+	         gSubCode <- (ToNumber(gSubCode)+1)+""
+			 subjectbox.text <- gSubCode
+           }
+
+          }
+      }elseif(tmp==7)  ##Change subject code
+      {
+	   
+       ##subject box
+	   Show(subboxhighlight)
+	   relx <- First(gClick) - (subjectbox.x )
+	   rely <- Second(gClick) - (subjectbox.y )
+
+	   subjectbox.cursorpos <-    (GetTextBoxCursorFromClick(subjectbox,relx,rely))
+
+	   Draw()
+	   gsubcode <- GetInput(subjectbox,"<return>",1)
+	   Hide(subboxhighlight)
+	   
+      }elseif(tmp==8)
+      {
+	     gfullscreen <- 1-gfullscreen
+		 if(gfullscreen)
+		 {
+		   fullscreenbox.text <- "X"
+         }else{
+		   fullscreenbox.text <- ""
+         }
+      }elseif(tmp==9)  ##Change experimenter code
+      {
+       ##experimenter box
+	   Show(expboxhighlight)
+	   relx <- First(gClick) - (expbox.x )
+	   rely <- Second(gClick) - (expbox.y )
+	   cursorpos <- GetTextBoxCursorFromClick(expbox,relx,rely)
+	   expbox.cursorpos<-cursorpos
+	   Draw()
+	   experimenter <- GetInput(expbox,"<return>",1)
+	   Hide(expboxhighlight)
+	   
+      }elseif(tmp==10)  ##Change language code
+      {
+
+       ##languagebox
+	   Show(langboxhighlight)
+	   relx <- First(gClick) - (langbox.x )
+	   rely <- Second(gClick) - (langbox.y )
+	   cursorpos <-  GetTextBoxCursorFromClick(langbox,relx,rely)
+	   langbox.cursorpos <- cursorpos 
+	   Draw()
+	   gLanguage <- GetInput(langbox,"<return>",1)
+	   Hide(langboxhighlight)
+	   
+
+      }elseif(tmp==11)  ##Add to chain
+      {
+
+	     PushButton(addtochain)
+
+		 fname <- Nth(gFlatFileList,gselected)
+		 if(IsPEBLFile(fname))
+         {
+		   gexpchain <- Append(gexpchain,[gDirChain,fname])
+		   chainlist.text <- MakeExpChainText(gexpchain)
+
+         }
+
+	   
+      }elseif(tmp==12)  ##clear chain
+      {
+	    PushButton(clearchain)
+        gexpchain <- []        
+		chainlist.text <- MakeExpChainText(gexpchain)
+	   
+      }elseif(tmp==13)  ##launch chain
+      {
+      PushButton(launchchain)
+	  if(gnimhdemographics)
+	  {
+	  	  GetNIMHDemographics(gSubcode,win,"demographics-log.csv")
+        }
+
+   	  loop(i,gexpchain)
+       {
+	      dc <- First(i)
+          fname <- Second(i)
+          RunScript(dc,fname,gfullscreen,glanguage,logfile,gsubcode,gexperimenter)
+       }
+   
+      ##Increment subject code after you run
+      if(gAutoSubCode)
+         {
+           gSubCode <- (ToNumber(gSubCode)+1)+""
+	       subjectbox.text <- gSubCode
+         }
+
+      }elseif(tmp==14)  ##View debug output
+      {
+
+         PushButton(viewoutput)  
+         file <- DirListToText(gDirChain)+"stdout.txt"	 
+         resp <- LaunchFile(file)
+	 ##resp==0 should mean success!
+	 if(not resp==0)
+	 {
+	   MessageBox("Unable to find file: ["+file+"]",win)
+	 }
+  
+#	     SystemCall(gViewerCommand,  DirListToText(gDirChain)+"stdout.txt &")
+      
+      }elseif(tmp==15)  ##View error output
+      {
+         PushButton(viewerror)
+         file <- DirListToText(gDirChain)+"stderr.txt"	 
+         success <- LaunchFile(file)
+	 ##success==0 should mean success!
+	 if(not success==0)
+	 {
+	   MessageBox("Unable to find file: ["+file+"]",win)
+	 }
+         #SystemCall(gViewerCommand, DirListToText(gDirChain)+"stderr.txt &")
+
+      }elseif(tmp==16)  ##Edit script
+      {
+         PushButton(edit)    
+
+	 file <- DirListToText(gDirChain)+Nth(gFlatFileList,gselected)
+         success <-  LaunchFile(file)
+ 
+         if(not success == 0)
+            {
+	      	   MessageBox("Unable to find file: ["+file+"]",win)
+            } 
+
+      }elseif(tmp==17)  ##Open Manual
+      {
+	     PushButton(openmanual)
+         #SystemCall(gManualLoc,"")	  
+        Print(gManualLoc)
+        LaunchFile(gManualLoc)
+        
+      }elseif(tmp==18)  ##Launcher Size
+      {
+	 PushButton(launchsize)
+         #LaunchFile("https://fundry.com/project/69-pebl")
+	 if(gScreenSize=="small")
+	 {
+	   gScreenSize <- "large"
+	 } else {
+           gScreenSize <- "small"
+         }
+
+       MessageBox(gRelaunchMessage,win)
+
+      }elseif(tmp==19)  ##Visit web
+      {
+         PushButton(visitweb)
+         #SystemCall("http://pebl.sourceforge.net","")	  
+	 Launchfile("http://pebl.sourceforge.net")	  
+	   
+
+      }elseif(tmp==20)  ##About
+      {
+	   PushButton(about)
+	   MessageBox(gAboutText,win)
+      } elseif(tmp==21) ##edit description
+      {
+        if(gEditDescription)
+         {
+           #
+
+	     if(GetSystemType()=="LINUX")
+          {
+    	   relx <- First(gClick) - (description.x )
+	       rely <- Second(gClick) - (description.y )
+    	   cursorpos <-  GetTextBoxCursorFromClick(description,relx,rely)
+	       description.cursorpos <- cursorpos 
+     	   Draw()
+  		   desctext <- GetInput(description,"<return>",1)
+         descname <- DirListToText(gDirChain)+Nth(gFlatFileList,gselected)+".about.txt"
+         outfile <- FileOpenOverWrite(descname)
+         FilePrint(outfile,desctext)
+		     FileClose(outfile)
+
+         	#SystemCall(gViewerCommand + " " + DirListToText(gDirChain)+Nth(gFlatFileList,gselected)+".about.txt&")
+          } else {
+            LaunchFile(DirListToText(gDirChain)+Nth(gFlatFileList,gselected)+".about.txt")
+          }
+         }
+      }elseif(tmp==22)
+      {
+	     gnimhdemographics <- 1-gnimhdemographics
+		 if(gnimhdemographics)
+		 {
+		   demobox.text <- "X"
+         }else{
+		   demobox.text <- ""
+         }
+
+      }elseif(tmp==23)  ##sAVE CHAIN
+      {
+	     PushButton(savechain)
+         Saveconfig(gconfigname)
+
+
+      }elseif(tmp==24)  ##loadchain
+      {
+
+	     PushButton(loadchain)
+	     gConfigname <- GetEasyInput(gConfigNameText,win)
+		 ReadConfigFile(gConfigName)
+
+
+
+		 if(gfullscreen)
+		 {
+		   fullscreenbox.text <- "X"
+         }else{
+		   fullscreenbox.text <- ""
+         }
+
+		 if(gnimhdemographics)
+		 {
+		   demobox.text <- "X"
+         }else{
+		   demobox.text <- ""
+        }
+        chaintitle.text  <- gExpChainText+gConfigName
+        chainlist.text <- MakeExpChainText(gexpchain)
+
+
+
+
+      }elseif(tmp==25)  ##Visit wiki
+      {
+	     PushButton(wiki)
+         #SystemCall("http://pebl.sourceforge.net","")	  
+
+       if(Length(gDirChain)>1)
+       {
+         root <- Nth(gDirChain,Length(gDirChain))+"/"
+       }  else {
+	     root <- ""
+       }
+       wikipagename <- root+Nth(gFlatFileList,gselected)
+	   if(wikipagename=="." or wikipagename=="..")
+        {
+         wikipagename <- "Main_Page"
+        }
+	   Launchfile("http://sourceforge.net/apps/mediawiki/pebl/index.php?title="+wikipagename)
+      
+      } elseif(tmp==26)
+      { 
+
+	     gSubCode <- (ToNumber(subjectbox.text)+1)+""
+		 subjectbox.text <- gSubCode
+	     PushButton(subplusbutton)
+
+      } elseif(tmp==27)
+      { 
+
+       ##Command-line box
+	   relx <- First(gClick) - (clobox.x )
+	   rely <- Second(gClick) - (clobox.y )
+
+	   clobox.cursorpos <-  GetTextBoxCursorFromClick(clobox,relx,rely)
+	   Draw()
+	   gCommandLineText <- GetInput(clobox,"<return>",1)
+
+	   Hide(cloboxhighlight)
+      } elseif(tmp==28)
+      { 
+
+	   PushButton(filter)
+
+
+	   gFilters <- Rotate(gFilters,1)
+       filter    <- MakeButton(xbase+100,ybase+height-20,100,win,First(gFilters))
+	   gfilelist <-  FilterDir(GetDirectoryListing(DirlistToText(gDirChain)),gDirChain,First(gFilters))
+	   gFlatFileList <- Flatten(gfilelist)
+
+      }elseif(tmp==29)
+       {		
+                 PushButton(transmit)
+		 fname <-DirListToText(gDirChain)+ Nth(gFlatFileList,gselected)
+		 if(IsDataFile(fname))
+         {
+
+
+
+			bg1 <- Rectangle(550,400,700,800,MakeColor("black"),1)
+			bg <- Rectangle(750,400,490,790,MakeColor("grey"),1)
+
+			AddObject(bg1,win)			
+			AddObject(bg,win)
+
+
+			header <- EasyLabel("Transmit data file to server.",750,20,win,30)
+			message <- EasyLabel("Enter IP address or hostname:",750,60,win,22)
+			message2 <- EasyLabel("",750,80,win,22)
+			
+			entry <- EasyTextBox(gDefaultHostName,550,100,win,16,400,20)
+                        address <- GetInput(entry,"<return>")
+			gDefaultHostName <- entry.text
+			Draw()
+
+
+
+			text <- FileReadText(fname)
+
+			message.text <-"Opening connection to host: "+address
+			Draw()
+
+			starttime <- GetTime()
+			network <- 0
+			message2.text <- "waiting"
+
+			secs <- 0
+
+			
+			while(network==0 and secs < 10)
+ 			{
+
+ 	                   network <- ConnectToHost(address,4444)			     
+			   time <- Floor((GetTime()-starttime)/1000)
+			   
+			  
+			   if(time > secs)
+			   {
+			     Print("XXXX----")
+			     secs <- time
+	                     message2.text <- message2.text + "."
+			      Draw()
+                            }
+			}			
+
+			if(network==0)
+			{
+			   message.text <- "Unable to make connection to host."
+			   message2.text <- "Press any key to return."
+			   Draw()
+			} else {
+
+			   message.text <- "Connected to host. Sending data."
+			   Draw()
+
+			    SendFile(network,fname,"USER"+RandomDiscrete(10000),message)
+			    message.text <-  "Data sent."
+ 	  	 	    message2.text <- "Press any key to return."
+                #CloseNetworkConnection(network)
+			}
+
+			Draw()
+			RemoveObject(bg1,win)
+			RemoveObject(bg,win)
+			RemoveObject(entry,win)
+			RemoveObject(message,win)
+			RemoveObject(message2,win)
+			RemoveObject(header,win)
+
+			WaitForAnyKeyPress()
+
+			Draw()
+
+         } else {
+		   MessageBox("Specified file ["+fname+"] is not a known data file.",win)
+         }
+
+		 
+       } elseif(tmp==30) ##write review
+	   {
+ 	     PushButton(review)
+	     Launchfile("http://sourceforge.net/projects/pebl/reviews/")
+	   
+         }elseif(tmp==31)  ##Change screen resolution.
+         {       
+
+	  currentxy <- First(gScreenResInitial) +"x" + Second(gScreenResInitial)
+          screenmodes <- GetVideoModes()
+
+	  ##create a list of text-based screen modes to choose from:
+          modes <- []
+	  loop(i, screenmodes)
+	  {
+
+	    tmp <- First(i)+"x"+Second(i)
+
+	    if(tmp==currentxy)
+	    { 
+               PRINT("FOUNDIT")
+               tmp <- tmp + "*"
+	    }
+
+	     modes <- Append(modes, tmp)
+	  }  
+
+	  ##Add the custom option to the end of each:
+	  modes <- Append(modes,gCurrent)
+	  modes <- Append(modes,gCustomText)
+
+	  screenmodes <- Append(screenmodes,gCurrent)
+	  screenmodes <- Append(screenmodes,gCustomText)
+
+ 	  Print(modes)
+	  Print(screenmodes)
+          choice <-  GetEasychoice(gChooseScreenText,
+                           modes,
+			   screenmodes,
+			   win)
+
+
+          Print("CHOICE:")
+          Print(choice)
+
+           if(choice == gCustomText)
+	   {
+	     ##get custom screen size:
+                 width <- ToNumber(GetEasyInput(gGetWidthText,win))
+		 height <- ToNumber(GetEasyInput(gGetHeightText,win))
+		 gScreenRes <-  width+"x"+height
+
+	   } elseif(choice == gCurrent)
+	   {
+            ##Use the current screen resolution:
+	    gScreenRes <- gCurrent
+
+	   } else {
+	      #Use the specified resolution.
+              gScreenRes <- First(choice)+"x"+Second(choice)
+	   }
+      }
+      screenselection.text <- gScreenRes
+      screenback.width <- screenselection.width+6
+     Draw()
+   }
+
+
+}
+
+##This is a hard-coded filter;
+##it will only return .pbl files and directories.
+define FilterDir(inlist,path,type)
+{
+
+  pathhead <- DirListTotext(path)
+  tmpdir <- []
+  tmppbl <- []
+  loop(i, inlist)
+  {
+
+    if(IsDirectory(pathhead+i))
+      {
+
+       tmpdir <- Append(tmpdir,i)
+      }else{
+	  
+	  if(type=="*.pbl")
+       {
+       if(IsPEBLFile(i))
+        {
+            tmppbl <- Append(tmppbl,i)
+        }
+       } elseif(type=="data files") {
+       if(IsDataFile(i))
+         {
+		     tmppbl <- Append(tmppbl,i)
+         }
+	        
+       } elseif(type=="*.*"){
+	   ##no filter:
+		     tmppbl <- Append(tmppbl,i)
+       }
+
+     }
+  }
+  return [Sort(tmpdir),Sort(tmppbl)]
+
+}
+
+
+
+define DirToText(dirlist,filelist,offset,path)
+{ 
+
+  pathhead <- DirListTotext(path)
+
+  tmp <- []
+  loop(i,dirlist)
+  {
+    tmp <- Append(tmp,  i +"\"+ CR(1))
+  }
+
+  loop(i,filelist)
+  {
+    tmp <- Append(tmp,  i + CR(1))
+  }
+
+  ##this crashes here sometimes
+
+  list <- SubList(tmp,offset+1,Length(tmp))
+
+ return ListToString(list)
+}
+
+define AppendDirList(dirlist,dir)
+{
+
+ if(dir == ".")
+   {
+     dirlist <- dirlist
+   }elseif(not dir == "..")   
+   {
+      dirlist <- Append(dirlist,dir)
+   } else {
+      if((not Last(dirlist) == ".") and
+	     (not Last(dirlist) == ".."))
+	  {
+	      dirlist <- SubList(dirlist,1,Length(dirlist)-1)
+      } else {
+	      dirlist <- Append(dirlist,dir)
+      }
+   }
+
+   return dirlist
+}
+
+
+##appends a set of nested directories into a path.
+define DirlistToText(list)
+{
+  tmp <- ""
+  loop(i,list)
+  {		 
+     tmp <- tmp + i+ "/"
+  }
+  return tmp
+}
+
+
+define  FileSaveTable(table,filename)
+{
+   ##Not clear why we are using global here rather than the passed-in value.
+   ##filename <- gconfigName+".config"
+   outfile <- FileOpenOverwrite(filename)  ##Overwrite whatever we ave, without checking for it.
+   loop(i,table)
+    {
+       FilePrint_(outfile, First(i) + ",")
+
+	   if(IsList(Second(i)))
+        {
+		   sep <- ""
+		   loop(j,Second(i))
+           {
+		      FilePrint_(outfile,sep+j)
+			  sep <- ","
+           }
+		   FilePrint(outfile,"")
+        } else {
+		  FilePrint(outfile,Second(i))
+        }
+    }
+  FileClose(outfile)
+}
+
+
+##This makes the text to put in the expchain box.
+define MakeExpChainText(expchain)
+{
+	tmp <- ""
+  loop(i,expchain)
+	{
+ 	 tmp <- tmp +DirlistToText(First(i))+Second(i) + CR(1)
+	  
+    }
+  return tmp	
+}
+
+
+##returns a list of 0/1 indicating which elements of 
+##keys match key
+define Match(key,keys)
+{
+  tmp <- []
+  loop(i,keys)
+  {
+    tmp <- Append(tmp, key==i)
+  }
+ return tmp
+}
+
+
+define Filter(list,match)
+{
+  if(not Length(list)==Length(match))
+  {
+     SignalFatalError("List and match list much be of equal length in Filter(<list>,<match>)")
+  }
+  tmp <- []
+  list2 <- Transpose([list,match])
+
+  
+  loop(i,list2)
+  {
+
+    if(Second(i))
+    {
+      tmp<- Append(tmp,First(i))
+    }
+  }
+  return tmp
+}
+
+
+define RunScript(dirChain,filename,fullscreen,language,logfile,subcode,experimenter)
+{
+  ##Additional command-line parameters that should be hardcoded:
+  ## put --driver  --video, etc. here. 
+  gCommandLineAdd <- " " + gCommandLineText
+
+   type <- GetSystemType()
+   if(type== "LINUX" or type=="OSX")
+   {
+     sep <- " ; "
+   } else {
+     sep <- " & "
+   }
+   
+  ##On windows, should the launcher run from a PEBL subdirectory rather than C:\Program Files\pebl
+   if(gUseReloc)
+     {
+         
+        sep <- CR(1)
+        gPEBLName <- "\bin\pebl.exe"  ##The relative location should be bin\pebl.exe
+		    callstring <- "set ABSPATH=%CD%"+sep+"cd " + DirListToText(dirchain) + sep + gQuote+"%ABSPATH%" +gPEBLName +gQuote+ " " +filename + " -s " + subcode
+    		 ##callstring <- "set ABSPATH=%CD%"+gPEBLname+ CR(1)+ " cd "+DirListToText(dirchain)+CR(1)+gQuote+"%ABSPATH%"+gquote + " " + filename +" "  
+
+     }else {
+         
+    		 callstring <- "cd " + DirListToText(dirChain) + sep  + gPEBLName + " "  +filename + " -s " + subcode
+##    		 callstring <-  gPEBLName + " "  +filename + " -s " + subcode
+
+         Print("Executing : [" + callstring + "]")
+      }
+
+
+      ##Get the current screen size to use for launching experiments,
+      ##the preferred size should be set or read in from config file.
+      ## if we are not fullscreen.
+     if(gScreenRes == gCurrent)
+      {
+        gScreenResLine <- ""
+      }else  {
+        gScreenResLine <- "--display " + gScreenRes
+      }
+
+
+	  if(fullscreen)
+	   {
+	     callstring <- callstring + " --fullscreen " + gScreenResLine
+
+           }else{
+              ##If not fullscreen, use something sligtly smaller
+              ##to make way for toolbars etc.
+             callstring <- callstring + " " + gScreenResLine
+          }
+
+
+
+	    callstring <- callstring + " --language " + language  + " " + gCommandLineAdd
+  
+          if(type =="LINUX" or type == "OSX")
+           {
+                callstring <- callstring + " > stdout.txt 2> stderr.txt"
+           }
+
+         FilePrint(logfile,TimeStamp() + "," + DirListToText(dirChain)+ filename+","+GetPEBLVersion() + "," + experimenter + "," + subcode + "," +"fullscreen:["+fullscreen+"],"+ language + "," + callstring+ ","+"STARTED")
+
+         #### Run the experiment!!!!
+         Print(callstring)
+
+
+
+  if(gUseReloc)
+      {
+
+          runfile <- FileOpenOverWrite("tmp.bat")
+     ##     FilePrint(runfile,callstring+sep+"pause") ##Use for debugging purposes.
+          FilePrint(runfile,callstring)
+          FileClose(runfile)
+          SystemCall("tmp.bat","")
+      }else{
+         Print(SystemCall(callstring,""))
+      }
+
+         FilePrint(logfile,TimeStamp() + "," + DirListToText(gDirChain)+filename+","+GetPEBLVersion() +
+		 "," + experimenter + "," + subcode + "," +"fullscreen:["+fullscreen+"],"+ language + "," + callstring+ ","+"FINISHED")
+
+}
+
+
+
+define IsPEBLFile(fname)
+{
+
+  returnval <- 0
+  len <- StringLength(fname)	
+  if(len>4)	
+           {
+            if(SubString(fname,len-3,len)==".pbl")
+	     			{
+					  returnval <-  1
+                    }
+
+          }
+   return returnval
+}
+
+
+define IsDataFile(fname)
+{
+
+  returnval <- 0
+  len <- StringLength(fname)	
+  if(len>4)	
+           {
+		   tmp <- SubString(fname,len-3,len)
+            if(tmp==".csv" or tmp == ".dat" or tmp == ".txt") 
+    			{
+					  returnval <-  1
+                }
+
+          }
+   return returnval
+}
+
+
+define MakeButton(x,y,width,win,label)
+{
+   col <- MakeColor("grey70")
+   button <-MakeCanvas(width,20,col)
+
+
+
+   font<- MakeFont(gPEBLBaseFont,0,15,MakeColor("black"),MakeColor("white"),0)
+   label <- MakeLabel(label,font)
+
+   ##If the label is bigger than the button, shrink it.
+   if(label.width > (button.width-6))
+    {
+	   label.zoomx <- (button.width-6)/(label.width)
+    }
+
+   AddObject(label,button)
+   Move(label,width/2,9)
+   Draw(button)
+   
+   rect <-Rectangle(Floor(button.width/2),Floor(button.height/2),button.width,button.height,MakeColor("grey25"),0)
+   AddObject(rect,button)
+   Draw(rect)
+   Move(rect,rect.x-1,rect.y-1)
+   Draw(rect)
+   Move(rect,rect.x-1,rect.y-1)
+   Draw(rect)
+#   Move(rect,rect.x-1,rect.y-1)
+#   Draw(rect)
+   RemoveObject(rect,button)
+
+   AddObject(button,win)
+   
+   Move(button,x,y)
+   
+   return button
+}
+
+
+define PushButton(tmp)
+{
+	     Move(tmp,tmp.x+2,tmp.y+2)
+		 Draw()
+		 Wait(100)
+		 Move(tmp,tmp.x-2,tmp.y-2)
+		 Draw()
+}
+
+define ReadConfigFile(configname)
+{
+
+##This reads in some configuration stuff from the current
+## config file.
+
+   if(FileExists(configName+".config"))
+      {
+           config <- (ReadCSV(gConfigName+".config"))
+	   
+	   ##read in the keys--first characters.
+	   keys <- []
+	   loop(i,config)
+	   {
+	     keys<- Append(keys,First(i))
+           }
+
+	   tmpres <- First(gScreenResInitial)+"x"+Second(gScreenResInitial)
+	   gScreenRes <- GetConfig("screenres",keys,config,tmpres)
+	   gScreenSize <- GetConfig("screensize",keys,config,"large")
+	   gfullscreen <- ToNumber(GetConfig("fullscreen",keys,config,0))
+	   gnimhdemographics <- ToNumber(GetConfig("nimhdemo",keys,config,0))
+	   gsubcode    <- GetConfig("subcode",keys,config,"0")
+	   if(gAutoSubCode)
+            {
+	     gSubCode <- (ToNumber(gSubCode)+1)+""
+            }
+
+
+	   gDefaultHostName <- GetConfig("ipaddress",keys,config,"localhost")
+	   gCommandLineText <- GetConfig("commandline",keys,config,"")
+	   gexperimenter <-GetConfig("experimenter",keys,config,"default")
+	   glanguage <-GetConfig("language",keys,config,"en")
+
+   	   gexpchain <- []         ##sequence of experiments to run
+   	   ##Get all config entries named 'expchain'
+	   chains <- Filter(config,Match("EXPCHAIN",keys))
+	   loop(i,chains)
+            {
+              gexpchain <- Append(gexpchain,  [SubList(i,3,Length(i)),Second(i)])
+            }  
+
+      } else {
+      ##We don't have a config file.
+        gDefaultHostName <- "localhost"
+        gCommandLineText <- ""
+        gfullscreen <- 0
+        gsubcode <- "1"
+        gexperimenter <- "default"
+        glanguage <- "en"
+        gexpchain <- []         ##sequence of experiments to run
+	gnimhdemographics <- 0
+	gScreenSize <- "large"
+        gScreenRes <-  First(gScreenResInitial)+"x"+Second(gScreenResInitial)
+      }
+
+}
+
+define Saveconfig(configname)
+{
+
+
+    ##save settings on exit.
+	out <- [["fullscreen",gfullscreen],
+                ["subcode",gsubcode],
+                ["experimenter",gexperimenter],
+	        ["language",glanguage],
+	        ["nimhdemo",gnimhdemographics],
+	        ["commandline",gCommandLineText],
+	        ["ipaddress",gDefaultHostName],
+		["screensize",gScreenSize],
+		["screenres",gScreenRes]
+                             ]
+            
+
+	  loop(i,gexpchain)
+          {
+	     ilist <- Merge([Second(i)],First(i))
+	     out <- Append(out,["EXPCHAIN",ilist])
+           }
+      FileSaveTable(out,configname+".config")
+}
+
+
+
+define UpdateCapturedThumb(p)
+{
+   time<- GetTime()
+ 
+   if(time-gLastUpdate > 5)
+    {
+     mousexy <- GetMouseCursorPosition()
+     UpdatePortal(mousexy)
+    }
+
+   gLastUpdate <- time
+#   Draw()
+}
+
+##this should update the file list given mouse position
+define UpdatePortal(mousexy)
+{
+
+		mousey <- Second(mousexy)
+		filelen <- Length(gFlatFileList)
+
+
+		##compute the offset needed for the file window:
+		if(filelen <= gPortalNum)
+         {
+           offset <- 0
+         } else {
+
+		 proportion <- ((mousey - gPortal.y)/gPortal.height)
+		 offset  <- Floor(proportion * (filelen - gPortalNum))
+		 if(gselected < offset)
+          {
+             gselected <- offset+1
+          }
+		  if(gselected>offset+gPortalNum)
+		  {
+		     gselected > offset+gPortalNum
+   		  }
+
+		}
+
+	 gThumb.y <-  Max([Min([mousey, gPortal.y+gPortal.height/2-gutter*2]),gPortal.y+gutter])
+     gSelection.y <- gPortal.y+gyheight*(gselected-.5-offset)
+     gPortal.text <- DirToText(First(gfilelist),Second(gfilelist),offset,gDirChain)
+
+
+}
+
+
+define CLEARTHUMBCAPTURE(p)
+{
+#		Print("**********************Clearing thumb capture")
+		##you should update the thumb here!
+        mousexy <- GetMouseCursorPosition()
+		UpdatePortal(mousexy)
+		gKeepLooping <- 0
+		Draw()
+}
+
+
+
+define GetStrings(lang)
+{
+
+    gRunText <- "Run selected script"
+	gOpenText <- "Open"
+	gExitText <- "EXIT"
+	gViewDebugText <- "View debug output"
+    gViewErrorText <- "View error output"
+    gAddToChainText <- "Add to Chain"
+	gClearChainText <- "Clear Chain"
+	gSaveChainText <- "Save Chain"
+	gLoadChainText <- "Load Chain"
+	gOpenManualText <- "Open Manual"
+	gAboutLabelText <- "About"
+	gSizeText <- "Size: "
+	gwebtext <- "Visit Website"
+	gWikiText <- "Wiki"
+	gLaunchChainText <- "Launch Chain"
+    gNoDesc <- "No description found"
+    gPEBLTitle <- "PEBL Launcher for "
+    gPartCode <- "Participant Code:"
+    gCustomText <- "Custom:"
+    gCurrent <- "Current"
+    gGetWidthText <- "Enter custom width in pixels:"
+    gGetHeightText <- "Enter custom height in pixels:"
+	gExperCode <- "Experimenter:"
+	gCommandLineOptions <- "Command line options:"
+	gLangcode  <- "Language:"
+	gFulltext <- "Fullscreen"
+	gCollectDemoText <- "Collect demographics"
+    gScreenResLabel <- "Screen resolution:"
+
+    gExpChainText <- "Experiment Chain:"
+    gConfigNameText <- "Config name?"
+    gRelaunchMessage <- "Please exit the launcher and restart."
+    gChooseScreenText <- "Choose screen resolution to use"
+    gAboutText <-"PEBL is a system for creating and running psychology experiments.  It is developed by Shane T Mueller, Ph.D., and includes more than 50 standard psychology lab experiments.  You can use PEBL to create your own tests or modify previous ones FREE OF CHARGE. Find out more at http://pebl.sf.net
+
+This launcher is written in PEBL itself, allowing a fairly uniform launcher on all platforms. Only .pbl  files and directories are shown in the file window--use your file manager to get the data after your experiment is complete. Click on a directory that has been selected to open it.  Add scripts to the experiment chain window to run a sequence of experiment in a row, all using the same subject code.  
+
+ *The file [PEBLLaunch-log.txt] contains a log of every experiment launched from the launcher.
+ *Debug output from each script (using the Print() command) is saved in the file [stdout.txt] file in a script's directory.
+ *Error and automatic messages from each script are saved in the file [stderr.txt] in a script's directory."
+
+
+
+  lang <- Uppercase(lang)
+  if(lang == "ES")
+   {
+    gRunText <- "Ejecutar script seleccionado"
+    gOpenText <- "Abre"
+    gExitText <- "EXIT"
+    gViewDebugText <- "Ver la salida de depuración"
+    gViewErrorText <- "Ver la salida de error"
+    gAddToChainText <- "Añadir a la cadena"
+    gClearChainText <- "Borrar la cadena"
+    gSaveChainText <- "Guardar la cadena"
+    gLoadChainText <- "Cadena de carga"
+    gOpenManualText <- "Abrir Manual"
+    gAboutLabelText <- "Acerca de"
+    gSizeText <-"Size: "
+    gwebtext <- "Página Web"
+    gWikiText <- "Wiki"
+    gLaunchChainText <- "Lanzamiento de la cadena"
+    gNoDesc <- "La descripción no encontrado"
+    gPEBLTitle <- "PEBL Launcher para "
+    gPartCode <- "Código de Participante:"
+    gExperCode <- "Experimentador"
+	gCommandLineOptions <- "Command line options:"
+    gLangcode <- "Idioma:"
+    gFulltext <- "Pantalla Completa"
+    gScreenResLabel <- "Screen resolution:"
+    gCustomText <- "Custom:"
+    gCurrent <- "Current"
+    gCollectDemoText <- "Recoger datos demográficos?"
+    gChooseScreenText <- "Choose screen resolution to use"
+    gExpChainText <- "Experimento de la cadena:"
+    gConfigNameText <- "nombre de configuración?"
+    gRelaunchMessage <- "Please exit the launcher and restart."
+    gAboutText <- "Spanish Translation courtesy automated translation. PEBL es un sistema de creación y ejecución de experimentos de psicología Es desarrollado por Shane T Mueller, Ph.D., e incluye más de 50 experimentos de laboratorio estándar de la psicología Puede utilizar PEBL para crear sus propias pruebas o modificar la anterior. los GRATUITO. Más información en http://pebl.sf.net
+
+Este lanzamiento está escrito en PEBL sí mismo, permitiendo que un lanzador bastante uniforme en todas las plataformas. . Sólo los archivos y directorios pbl se muestran en la ventana del archivo - utilizar su gestor de archivos para obtener los datos después de la prueba se ha completado. Haga clic en un directorio que ha sido seleccionada para abrirlo. Agregar secuencias de comandos a la ventana de la cadena de experimento para ejecutar una secuencia de experimentos en una fila, todas ellas con el código mismo tema.
+
+ * El archivo [PEBLLaunch-log.txt] contiene un registro de todos los experimentos en marcha del lanzador.
+ * La salida de depuración de cada secuencia de comandos (usando la Print() comando) se guarda en el archivo el archivo [stdout.txt] en el directorio de un script.
+ * Mensajes de error y automática de cada secuencia de comandos se guardan en el archivo [stderr.txt] en el directorio de una secuencia de comandos."
+
+   }
+}
+
+
+
+## This should be received with ReceiveText(network)
+define SendText(network,text)
+{
+   len <- StringLength(text)
+   
+   Print("Sending: [" + ZeroPad(len,10)+"]")
+
+   SendData(network,ZeroPad(len,10))
+   SendData(network,text)
+   
+
+}
+
+
+define ReceiveText(network)
+{
+	len <- ToNumber(GetData(network,10))
+	text <- GetData(network,len)
+	return text
+}
+
+
+## a robust version of lookup:
+define GetConfig(key, keys, database,empty)
+{
+   line <- Lookup(key,keys,database)
+   if(Length(line)==0)
+   {
+    ret <- empty
+   }else{
+   ret <- Second(line)
+   }
+  return ret
+}
+
+
+
+
+
+
+## This sends a file using a direct tcp/ip connection, using
+## a special file protocol.
+##
+
+define SendFile(network,filename,id,label)
+{ 
+   Print("loading filename: ["+filename+"]")
+   text <- FileReadText(filename)
+   length <- StringLength(text)+""
+   
+   if(StringLength(length)>16)
+   {
+     SignalFatalError("Cannot send a file this long:"+length)
+   }
+
+   Print("Sending: [" +id +"] : "+length)
+   message <-  Format(id,32)+Format(length,16) + text
+   label.text <-"Attempting to send data to server (up to 10 secs)"
+   Draw()
+   Wait(500)
+   success <- SendData(network,message)
+   if(success)
+   {
+      label.text <- "Succeeded at sending data"
+      Draw()
+      Wait(500)
+   } else {
+      label.text <- "Failed to send data.  Please try again later or send data files directly. Press any key to begin."
+      Draw()
+      WaitForAnyKeyPress()
+   }
+   return success
+}

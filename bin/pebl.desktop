@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=14.0
+Name=PEBL
+Comment=PEBL launcher launcher
+Exec=/usr/local/bin/pebl /usr/local/share/pebl/pebl-lib/launcher.pbl
+Icon=/usr/local/share/pebl/media/images/pebl.png
+Terminal=false
+Type=Application
+Categories=Utility;Application;

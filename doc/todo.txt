@@ -1,0 +1,339 @@
+========================================
+TODO for 0.14
+
+
+ *Add/fix probedigit
+ * flanker task--make neutral version flanked by lines (or at least add the condition) (DONE)
+ *switcher task--add debriefing (DONE)
+   - move mouse cursor a bit after each click so letter is not obscured. (DONE)
+
+ * setting bgcolor of a window doesn't seem to work; it 
+     distorts the color (at least one created with RGBColor) (FIXED)
+
+ * PropertyExists does not seem to work right (workaround with IsProperty in Utility.pbl); (now fixed).
+
+* look at Mueller-lyer illusion for better instructions (they appear not to change; works as intended)
+* Look into WritePNG on windows. (fixed)
+* Figure out d prime/beta calculation (done)
+
+ * fix/workaround or document font limitation to around 1000 fonts (mostly fixed; limit is now much higher, although not perfect)
+ * bring in satest fixes made to enable varying predator size and screen size. (DONE)
+ 
+* (temporary) xy coordinates of objectsmessedup. (fixed)
+- Seems to be a problem with setting x/y location of images that are scaled?  (Fixed)
+
+-Some crash in dots task with new evaluator. (fixed)
+ * Sublist does not provide useful error feedback. (DONE)
+ *TOH output is messed up supposedly. (DONE)
+ * Cannot enter | into text box... (fixed)
+
+ *fix subject code text getting blurry. (Done)
+ *Incorporate PAR scoring into BCST (DONE)
+
+* Mental Rotation: At least for version 0.11, there was a ton of output that takes (at least for us non-Linux users), a fair amount of post-processing. If it was possible to have a report which has the mean time and percent correct for each angle of rotation, that'd be helpful. (DONE)
+
+* Iowa: The Psychological Assessment Resources version has a brief (500 msec) delay after each selection. This helps to limit the potential that people just respond quick but thoughtlessly. There also is an audio component after each a response (I think it was a "cha-ching" after $ gained, a buzzer after $ lost). (DONE)
+
+
+ *nback hangs on second block???
+ -Runaway crash on demo/NBack.pbl  (maybe with new evaluator)(works now (or does it))
+
+ * Fix GetInput mouse event (DONE)
+ * Fix multi-parameter stuff (DONE; removed this; 
+                        need to fix the schema file for some test)
+  *Add ui for parameter sets files (DONE)
+
+Verify:
+
+2) Berg: If it'd be possible to get the mean (or median) response time for each response category, that'd be helpful. Admittedly, I may be the only one interested in these measures but I think there's some interesting info in these end-points that folks haven't considered because it wasn't available for the traditional (physical card) version.
+
+
+ *Document new parameter system
+ *Document new sound files *
+
+ Document the CustomObject object/functions:
+  GetPropertyList#*
+  SetProperty#*
+  GetProperty#*
+  PropertyExists#*
+  MakeCustomObject*#
+  IsCustomObject*#
+
+
+*Document the use of CombineDataFiles utility#
+*Document http check-in launcher
+
+
+
+*Document list option for second argument of ReplaceChar()#*
+*Document SplitStringSlow #*
+MakeButton*#
+PushButton*#
+MakePullDown#*
+PullDown#*
+UpdatePullDown#*
+DrawPullDown#*
+PopuUpMessageBox#
+PopuUpEntryBox#*
+MakeCheckBox*#
+ClickCheckBox*#
+SetCheckBox*#
+MakeTextlist#*
+MD5File#*
+MD5Sum#*
+GetNewDataFile()#*
+MakeScrollingTextBox*#
+SetScrollingText*#
+MakeScrollBox#*
+UpdateScrollBox#*
+DrawScrollBox#*
+ClickOnScrollBox#*
+
+InsideTB*#
+DrawObject*#,
+MoveObject*#,
+ClickOn *#
+Inside changes to handle custom objects. (DONE)
+
+MakeMenu#*
+MakeMenuItem#*
+
+ClickOnMenu#*
+OpenSubMenus+*
+
+
+
+*Document GetHTTPFile()#, GetHTTPText()#, PostHTTP()#
+
+
+ Remaining:
+
+*document  --resizeable
+* look into mis documentos\ stuff on xp and others 
+* investigate why spaces in filenames choke on windows.
+* Launcher chokes when there is a blank in the filename.(Verified works on linux)
+
+*Look at 64-bit parallel-port stuff
+ *make digitspan forward and backward parameter sets.
+
+
+ * Strange [<timeout>] response when we used waitforkeylistdown() (which is never really used).
+
+
+* zenhei font in standalone.
+
+
+
+ Blue Sky:
+*On-line experiment creator.
+ * Recording input only grabs 5 secs.
+ - Optional arguments???
+ - Allow Shuffle to take multiple arguments, which are shuffled in parallel??? (Not done)
+
+
+To Do for 0.13:
+=================================================================
+-  stdout.txt problems
+- windows launcher won't load files with spaces in their names.
+- installing overtop 0.12 can cause some problems.
+
+
+- determine whether secret abort code works on italian keyboards.
+   (fixed...)
+
+- document what happens when lookup doesn't find a match. ****Done
+
+- be sure to fix keypad entry on digit span; probably fixed for 3001; see Marco Moniz email.  ***Fixed.
+
+- New trail test (Salthouse's one). **Completed.
+
+-Document transition from list to vector; access to lists via [] not yet possible. **Complete
+
+Transpose seems to give a wrong answer for Transpose([[1,2]]), Which I think should be [[1],[2]]  FIXED--it does give this answer.
+
+- PrintProperties only works on widgets; should work on all objects. (it should work on network objects and ports etc.) PUSH
+
+- Loading/reloading sound files that are mono crashes on the conversion. (See ann gilman's bug--document this???) **documented
+
+-launcher should work on 1024x600 screen (small screen works) *Done, with button to switch.
+
+- Improved Debian Packaging. **In progress
+- debian makefile stuff. **Done
+- Incorporate documentation in makefile.**Done
+
+EasyLabel can't accept a number in the text variable. Maybe it should?
+  --fixed: autoconvert to numbers, but send a warning in case things go awry.
+
+- Perseveration stuff in BCST. (data script is fixed...may not be ready?)
+
+- possibly, do checking for screen size under fullscreen mode. (**DONE)
+
+- Fix cr/lf in windows battery files. (mostly fixed)
+
+- Have consistent solution to getting subject code in battery tests. (mostly fixed)
+
+- fix shuffling problem in BCST  ????
+
+ - for battery, fix gsubnum stuff and screen resolution stuff. (Mostly fixed)
+
+ - move GetEasychoice to libs; remove from battery tests that use it. ****DONE
+
+
+
+ - Create a PushOnEnd type function (DONE)
+
+- look at layout functions in multichoice battery test to incorporate as full function. (LayoutGrid now in function lib).
+
+- WaitForAnyKeyPressWithTimeout doesn't work.
+- WaitForAnyKeyDownWithTimeout doesn't work.
+
+-Solve CJK font issue (replace firefly and the other one??)
+
+-ANT test problems (crashes in 0.12) ***FIXED
+-TOL test problems (crasher w/too long lists) ***Fixed
+-TOH--slowdown with trials (TOH TOO?). ***Fixed for TOH
+-New: a simple ebbinghaus test
+
+ -Document Parallel port functions
+ -consider changing getstate function to return list of 0/1
+
+ -Document serial port functions
+
+ -Krystal's bug in TOHd 
+
+ -document WaitForClickOnTargetWithTimeout, remove from battery tests*****done
+ -document CountDown(), remove from battery tests.*****Done
+- document Match(), Filter(), and Levels()****Done
+- Function that determines current screen size. ****Done
+- Document GetCurrentScreenResolution and GetVideoModes()****Done
+- document RemoveFile(), changes to FileOpenWrite()****Done
+
+
+- improve  recursion stuff. (Not done)
+- new tcp/ip stuff:
+ GetMyIPAddress()  (Doesn't work/don't use it.)
+ AcceptNetworkConnection() (not sure if this is ever used)
+ OpenNetworkListener()+*
+ CheckForNetworkConnection()+*       
+
+GetPixelColor()+*
+LayoutGrid+*
+RemoveFile()+*
+GetCurrentScreenResolution()*
+CountDown()+*
+PushOnEnd()+*
+SetElement()+*
+LaunchFile()+*
+
+WaitForClickOnTargetWithTimeout()+*
+
+LoadMovie()+*
+LoadAudioFile()+*
+StartPlayback()+*
+PausePlayback()+*
+PlayMovie()+*
+
+--Already there?
+FileOpenOverwrite()+*
+MakeDirectory()+*
+AddObject() fix+*
+FileOpenWrite()+ *
+Match()+*
+Filter()+*
+Levels()+*
+GetVideoModes()+*
+GetEasyChoice()+*
+--------------------------------------------
+##Completed for 0.12
+
+- File selector: 
+                 Add a +1 button to subject code? ***Done
+
+- we seem to get unknown feedback if you use a variable that hasn't
+  been defined???? (probably the stderr problem) ***
+
+
+
+-  line wrapping: when the last token in a string is too long to fit
+   on a line and it is wrapped to the next line, it takes the previous
+   token along with it.  --***done
+
+ - Add a FileExists() function??? ***done
+
+ - Add a Dir() functions???  ***done (GetDirectoryListing()
+
+ - Document Joystick Functions **Done
+
+
+ -fix problem where clicking outside box will lose focus and finish
+  input (should be an option) ***done
+
+ -automatic subject code/experiment name logging? **Done in fileselect
+
+ - Make/document various layout functions **Done
+
+
+
+- file concatenation function (appendfile?).  **Done
+
+- streams of experiments  **done
+
+- FileExists() to test whether a file is there**done
+
+
+ - save clock test to file + instructions (it may already exist?) **Done
+
+-EasyLabel crashes silently without feedback if window is given as the
+ second argument??? ***fixed
+
+
+- allow the strings to be translated in the launcher (and possibly
+  elsewhere?) ***done
+
+
+=============================================
+Push to 0.13 or Later
+
+getText seems not to work on labels
+
+ - Let lists be defined with more whitespace options.  Currently,
+    things like this seems to fail:
+  a <- [[1]
+       ]
+     
+ - Make a function that unloads the window but keeps running the PEBL.
+
+- Launcher: randomize experiment chain
+    -save chain to a .bat file?
+    -data compiler?
+
+ - document GetMinDist (But this is just a helper function)
+
+- Print("") a message in test batteries about where data is saved.  Maybe link that to FileClose()?
+
+ - add reporting for TOL of additional statistics. 
+ - make a report for trails test.
+
+
+- Colorblind issues in TOL, Others?
+
+- makeImage will load a non-graphics file happily, but segfault
+
+- seteditable() works, but .editable doesn't
+
+-allow if() statements to be empty.  *Maybe works
+-syntax _should_ handle, shouldn't it?:
+}
+else
+{
+
+
+
+- itemorder test uses Z/Zed; change to length 7???
+
+
+
+
+- BCST: report median RTs for different response conditions
+- BCST: try the Piper alternative scoring method.
+

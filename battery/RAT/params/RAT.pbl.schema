@@ -1,0 +1,10 @@
+timeout|30|time per problem in s
+doeasy|1|Should you do the easy problems,
+domed|1|Should you do the medium difficulty problems
+dodiff|0|SHolud you do the hard problmes],
+mixproblemsets|1|Should problem sets be mixed
+blocksize|100|Give a pause after this many trials (>68 means no pause)
+maxprobs|68|Do at most only this many problems. They will be mixed between conditions specified by doeasy domed and dodiff
+seedrandom|0|Set this to use the same randomization every time
+rngseed|1000|Choose a random number to seed order
+allowretry|0|should you be able to retry until you get correct (and time up)

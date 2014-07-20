@@ -1,0 +1,220 @@
+define Start(p)
+{
+   
+
+  parpairs <- [["restmin",4000],
+  	       ["restmax",8000],
+  	       ["targetletter","X"],
+	       ["foilletters","AKMNRVWYZ"],
+	       ["stimProb",.25],
+	       ["stimtime",300],
+	       ["timeout",2700],
+	       ["numtrials",10]
+               ]
+
+
+  gParams <- CreateParameters(parpairs,gParamFile)
+
+  gWin <- MakeWindow("black")
+  gSleepEasy <- 1
+
+  if(gSubNum+"" == "0")
+   {
+      gSubNum <- GetSubNum(gWin)
+   }
+
+
+
+   header <- "subnum,trial,stim,target,corr,delay1,delay2,rt,resp,abstime"
+
+   ## Make data files   
+   gFileOut <- GetNewDataFile(gSubNum,gWin,"vigilance","csv",header)
+
+
+  gCircle <- Circle(gVideoWidth/2,gVideoHeight/2,100,MakeColor("white"),1)
+  gDonut <-  Circle(gVideoWidth/2,gVideoHeight/2,80,MakeColor("black"),1)
+  gPlus  <-  Plus(gVideoWidth/2,gVideoheight/2,95,20, MakeColor("white") )
+  gScreen <- Circle(gVideoWidth/2,gVideoHeight/2,120,MakeColor("black"),1)
+
+
+  AddObject(gCircle,gWin)
+  AddObject(gDonut,gWin)
+  AddObject(gPlus,gWin)
+  AddObject(gScreen,gWin)
+  gStim <- EasyLabel("",gVideoWidth/2,gVideoheight/2,gWin,80)
+  Hide(gCircle)
+  Hide(gDonut)
+  Hide(gPlus)
+  Hide(gScreen)
+  Hide(gStim)
+
+  gFooter <- EasyLabel("Press space bar for "+gParams.targetletter+"",
+                       gVideoWidth/2,gVideoHeight-150,gWin,18)
+
+
+  gFoils <- SplitString(gParams.foilletters,"")
+
+   ShowCursor(0)
+
+  inst <- EasyTextBox("",gVideoWidth/2-300,20,gWin,18,600,200)
+
+  inst.text <- "In this task, you will watch the screen and press the space bar whenever you see an 'X'. Your goal is to respond as quickly as possibly without making errors.  Although this sounds easy, it can be quite difficult, and will require your full attention.
+
+To begin with, you will see a circle like below.  Press any key to continue."
+Show(gCircle)
+Show(gDonut)
+Draw()
+
+    WaitForAnyKeyPress()
+
+    inst.text <- "Each trial will begin with this circle, which indicates you can rest.  While the circle is on the screen, no stimulus will appear, and you should relax.  Press any key to continue."
+    
+   Draw()
+   WaitForAnyKeyPress()
+   
+   Show(gplus)
+   inst.text <- "When a stimulus is getting ready to appear, a cross will appear within the circle.  This tells you that the stimulus is about to appear, and you should be prepared to respond. When the cross appears, make sure your finger is on the keyboard, ready to respond.  Press any key to continue."
+  
+   Draw()
+   WaitForAnyKeyPress()
+
+   Hide(gPlus)
+   inst.text <- "After a short amount of time, the actual stimulus will appear.  It might be an 'X' like you see below.  If it is an 'X', press the space bar as quickly as possible.  Press any key to continue."
+   gStim.text <- "X"
+   Show(gStim)   
+   Draw()
+   WaitForAnyKeyPress()
+
+  
+  inst.text <- "Alternately, it might be another letter, such as the 'K' you see below.  If the letter you see is NOT an 'X', do not respond, and simply wait for the stimulus to disappear and the next rest period to occur.  Press any key to continue."
+   gStim.text <- "K"
+    Draw()
+    WaitForAnyKeyPress()
+    Hide(gStim)
+    Hide(gDonut)
+    Hide(gCircle)
+
+    inst.text <- "Now, we will begin with some practice trials. Ready?"
+
+    Draw()
+    WaitForAnyKeyPress()
+
+  Hide(inst)
+
+   resp <-  Trial("X")
+   corr <- resp == " "
+    Show(inst)
+    inst.text <- "This was a target trial, and you should have responded to the 'X' by hitting the space bar.  "
+    
+    if(corr)
+	{
+        inst.text <- inst.text + "This is what you did, and so you got the trial correct.  Press any key for another practice round."
+        }else{
+        inst.text <- inst.text + "However, you did not press the space bar, and so got the trial wrong.  You should have pressed the space bar.  Press any key for another practice round."
+        }
+
+
+    Draw()
+    WaitForAnyKeyPress()
+    Hide(inst)
+    Draw()
+    resp <-  Trial("Z")
+    corr <- resp == "NORESP"
+
+    Show(inst)
+    inst.text <- "On this trial, the letter was a 'Z', and you were not supposed to respond.  "
+
+if(corr)
+	{
+        inst.text <- inst.text + "Good job.   Press any key for a series of five practice trials."
+        }else{
+        inst.text <- inst.text + "However, you pressed the space bar, and so this was not correct.  Next time, do not press the key unless you see an 'X'.   Press any key for a series of five practice trials."
+        }
+    Draw()
+    WaitForAnyKeyPress()
+    Hide(inst)
+    Draw()
+    pracstim <- Shuffle(["X","X","O","Z","V"])
+     loop(s,pracstim)
+     {
+         Trial(s)
+     }
+      
+
+  Show(inst)
+  inst.text <- "Now you will be tested fo real.  Press any key to begin."
+  Draw()
+  WaitForAnyKeyPress()
+  Hide(inst)
+  Draw()
+
+  numTargs <- Floor(gParams.stimprob*gParams.numtrials)
+  numFoils <- gParams.numtrials - numTargs
+  stimseq <- Shuffle(Merge(Repeat(gParams.targetletter,numTargs),
+                     SampleNWithReplacement(gFoils,numFoils)))
+
+   trial <- 1
+  loop(s,stimSeq)
+  {
+   resp <-  Trial(s)
+   
+   trial <- trial + 1
+   target <- ( s == gParams.targetletter)
+   response <- First(resp)
+   corr <- (target  and (response==" ")) or  ((not target)  and (response=="NORESP"))
+   FilePrint(gFileOut,gSubNum+"," + trial + "," +s+","+ target + "," + corr +","+
+              First(resp) +"," +Second(resp)+","+Third(resp)+","+Fourth(resp)+","+
+               GetTime() )
+   trial <- trial +1
+  }
+
+}
+
+
+define Trial(stimulus)
+{
+
+  Show(gCircle)
+  Show(gDonut)
+  ##Rest period
+  gFooter.text <- "Rest"
+  ##do rest period
+  delay1 <- gParams.restMin + Random() *(gParams.restMax - gParams.restMin)
+  delay2 <- gParams.restMin + Random() *(gParams.restMax - gParams.restMin)
+  Draw()
+  time1 <- GetTime()
+  Wait(delay1)
+  time2 <- GetTime()
+  gFooter.text <- "Await stimulus"
+#  gStim.text <- "+"
+  Show(gPlus)
+  Draw()
+  Wait(delay2)
+  Hide(gPlus)
+  Hide(gCircle)
+  gStim.text <- stimulus
+  Show(gStim)
+  gFooter.text <- "Respond only to " +gParams.targetletter
+  Draw()
+  time3 <- GetTime()
+  endtime <- time3 + gParams.stimtime + gParams.timeout
+  resp <- WaitForListKeyPressWithTimeout([" "],gParams.stimtime,1)
+  if(IsList(resp))
+  {
+    resp <- WaitForListKeyPressWithTimeout([" "],gParams.timeout,1)
+  }
+  gFooter.text <- ""
+  time4 <- GetTime()
+  if(IsList(resp))
+  {
+    resp <- "NORESP"
+  }
+  Hide(gStim)
+  Hide(gPlus)
+  Hide(gCircle)
+  Draw()
+  Wait(endtime-time4)
+    
+  return [delay1,delay2,time4-time3,resp]
+}
+

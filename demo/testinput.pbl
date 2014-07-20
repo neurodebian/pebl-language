@@ -1,0 +1,18 @@
+define Start(p)
+{
+   font <- MakeFont("Vera.ttf",0,22,MakeColor("red"),MakeColor("white"),0)
+   win <- MakeWindow()
+   tb <- MakeTextBox("test one two threeeeee fouuuuuur fivvvvve",font, 400,200)
+   AddObject(tb,win)
+   Draw()
+
+   resp  <- GetInput(tb,"<esc>")
+   Print(resp)
+   resp <- "X"
+   while(resp != "q")
+   {
+     resp <- WaitForAnyKeyPress()
+     Print(resp)
+   }
+
+}

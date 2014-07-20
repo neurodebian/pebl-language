@@ -1,0 +1,2 @@
+runlength|10|Number of correct responses required before switching categories.  Typically, 10 are used, although 5 is also common.
+usemouse|1|Whether the mouse should be used to control the test.  If 0, keyboard keys will be used. If non-zero, mouse will be used.

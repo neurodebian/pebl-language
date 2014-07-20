@@ -1,0 +1,7 @@
+Você está prestes a participar de uma avaliação em que você precisa classificar cartas baseado nas figuras que aparecem nelas.  Para começar, você verá quatro pilhas (clique com o botão do mouse para ver as quatro pilhas).
+Cada pilha tem número, cor e forma diferentes.  Você verá uma série de cartas e precisa determinar a qual pilha elas pertecem. Clique em uma pilha com o apontador do mouse para determinar a pilha a que cada nova carta pertence.  A resposta correta depende de uma regra, mas você não saberá qual é regra.  Porém, nós lhe diremos em cada rodada se você está ou não correto. Clique com o mouse para continuar.
+Finalmente, a regra mudará durante a tarefa, de forma que, quando isso ocorrer, você deverá descobrir qual é a nova regra o mais rápido possível e mudar com ela. Clique o botão do mouse para começar.
+You may now leave.  Please alert the experimenter that you are done. Click mouse to conclude.
+Clique na pilha para classificar a carta
+Correto!
+Incorreto

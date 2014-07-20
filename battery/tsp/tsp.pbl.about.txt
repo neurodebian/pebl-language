@@ -1,0 +1,2 @@
+PEBL Traveling Salesman Problem.  Have participants solve TSP problems to 
+judge efficiency and speed of spatial reasoning.
